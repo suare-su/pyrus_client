@@ -15,10 +15,21 @@ use SuareSu\PyrusClient\Transport\TransportMethod;
  */
 final class PyrusEndpointTest extends BaseCase
 {
-    public function testMethod(): void
+    /**
+     * @dataProvider provideMethod
+     */
+    public function testMethod(PyrusEndpoint $endpoint, TransportMethod $expectedMethod): void
     {
-        $method = PyrusEndpoint::AUTH->method();
+        $this->assertSame($expectedMethod, $endpoint->method());
+    }
 
-        $this->assertSame(TransportMethod::POST, $method);
+    public static function provideMethod(): array
+    {
+        return [
+            'post' => [
+                PyrusEndpoint::AUTH,
+                TransportMethod::POST,
+            ],
+        ];
     }
 }
