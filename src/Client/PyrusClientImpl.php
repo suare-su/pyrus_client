@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SuareSu\PyrusClient\Client;
 
-use SuareSu\PyrusClient\Transport\PyrusTransportManager;
+use SuareSu\PyrusClient\Transport\PyrusTransport;
 
 /**
  * Basic implementation for PyrusClient interface.
@@ -18,7 +18,7 @@ final class PyrusClientImpl implements PyrusClient
     private ?Credentials $credentials = null;
 
     public function __construct(
-        private readonly PyrusTransportManager $transportManager,
+        private readonly PyrusTransport $transport,
         private readonly Options $options
     ) {
     }

@@ -7,6 +7,6 @@ namespace SuareSu\PyrusClient\Transport;
 /**
  * Facade for HTTP client. Converts data and throws errors.
  */
-interface PyrusTransportManager
+interface PyrusTransport
 {
 }
