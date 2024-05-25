@@ -14,10 +14,10 @@ interface PyrusClient
     /**
      * All further client requests will be authorized using the provided token.
      */
-    public function useAuthToken(AuthToken $token): void;
+    public function useAuthToken(PyrusAuthToken $token): void;
 
     /**
      * Client will clear all authorisation info and try to get a new token for the provided credentials.
      */
-    public function useAuthCredentials(Credentials $credentials): void;
+    public function useAuthCredentials(PyrusCredentials $credentials): void;
 }

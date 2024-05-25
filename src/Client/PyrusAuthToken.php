@@ -7,7 +7,7 @@ namespace SuareSu\PyrusClient\Client;
 /**
  * Object that stores authorization token from Pyrus.
  */
-final class AuthToken
+final class PyrusAuthToken
 {
     public function __construct(
         /** @psalm-var non-empty-string */

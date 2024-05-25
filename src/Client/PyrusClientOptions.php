@@ -9,7 +9,7 @@ use SuareSu\PyrusClient\Pyrus\PyrusDomain;
 /**
  * Object that stores and provides configuration for Pyrus client.
  */
-final class Options
+final class PyrusClientOptions
 {
     public function __construct(
         /** @psalm-var non-empty-string */

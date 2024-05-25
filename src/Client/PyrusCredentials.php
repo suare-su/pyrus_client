@@ -7,7 +7,7 @@ namespace SuareSu\PyrusClient\Client;
 /**
  * Object that stores credentials for Pyrus authorization.
  */
-final class Credentials
+final class PyrusCredentials
 {
     public function __construct(
         /** @psalm-var non-empty-string */
