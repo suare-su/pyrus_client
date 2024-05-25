@@ -48,7 +48,7 @@ final class PyrusClientImpl implements PyrusClient
      */
     private function createEndpointUrl(PyrusEndpoint $endpoint, array $params = [], ?string $forceBaseUrl = null): string
     {
-        $baseUrl = $forceBaseUrl ?? ($this->token?->apiUrl ?? $this->options->defaultDomain);
+        $baseUrl = $forceBaseUrl ?? ($this->token?->apiUrl ?? $this->options->defaultBaseUrl);
         $path = $endpoint->path($params);
 
         return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');

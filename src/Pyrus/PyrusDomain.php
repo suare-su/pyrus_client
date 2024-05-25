@@ -7,8 +7,8 @@ namespace SuareSu\PyrusClient\Pyrus;
 /**
  * Enum that contains all domains for Pyrus.
  */
-enum PyrusDomain: string
+enum PyrusBaseUrl: string
 {
-    case ACCOUNTS = 'https://accounts.pyrus.com';
-    case API = 'https://api.pyrus.com';
+    case ACCOUNTS = 'https://accounts.pyrus.com/api/v4';
+    case API = 'https://api.pyrus.com/v4';
 }
