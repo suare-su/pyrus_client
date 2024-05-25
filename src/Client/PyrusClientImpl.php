@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SuareSu\PyrusClient\Client;
 
+use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 use SuareSu\PyrusClient\Transport\PyrusTransport;
 
 /**
@@ -38,5 +39,18 @@ final class PyrusClientImpl implements PyrusClient
     {
         $this->token = null;
         $this->credentials = $credentials;
+    }
+
+    /**
+     * Create an absolute URL for provided Pyrus endpoint.
+     *
+     * @psalm-param scalar[] $params
+     */
+    private function createEndpointUrl(PyrusEndpoint $endpoint, array $params = [], ?string $forceBaseUrl = null): string
+    {
+        $baseUrl = $forceBaseUrl ?? ($this->token?->apiUrl ?? $this->options->defaultDomain);
+        $path = $endpoint->path($params);
+
+        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
     }
 }
