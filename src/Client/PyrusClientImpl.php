@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace SuareSu\PyrusClient\Client;
 
+use SuareSu\PyrusClient\Exception\PyrusTransportException;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 use SuareSu\PyrusClient\Transport\PyrusTransport;
+use SuareSu\PyrusClient\Transport\Request;
+use SuareSu\PyrusClient\Transport\RequestMethod;
+use SuareSu\PyrusClient\Transport\Response;
 
 /**
  * Basic implementation for PyrusClient interface.
@@ -52,5 +56,27 @@ final class PyrusClientImpl implements PyrusClient
         $path = $endpoint->path($params);
 
         return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+    }
+
+    /**
+     * Request data from Pyrus API using provided data.
+     *
+     * @psalm-param non-empty-string $url
+     * @psalm-param array<string, mixed> $payload
+     * @psalm-param array<string, string|string[]> $headers
+     */
+    private function requestPyrus(RequestMethod $method, string $url, array $payload, array $headers = []): Response
+    {
+        $request = new Request($url, $payload, $headers, $method);
+
+        try {
+            $response = $this->transport->request($request);
+        } catch (PyrusTransportException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            throw new PyrusTransportException($e->getMessage(), 0, $e);
+        }
+
+        return $response;
     }
 }
