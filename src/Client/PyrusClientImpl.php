@@ -13,20 +13,20 @@ use SuareSu\PyrusClient\Transport\PyrusTransport;
  */
 final class PyrusClientImpl implements PyrusClient
 {
-    private ?AuthToken $token = null;
+    private ?PyrusAuthToken $token = null;
 
-    private ?Credentials $credentials = null;
+    private ?PyrusCredentials $credentials = null;
 
     public function __construct(
         private readonly PyrusTransport $transport,
-        private readonly Options $options
+        private readonly PyrusClientOptions $options
     ) {
     }
 
     /**
      * {@inheritdoc}
      */
-    public function useAuthToken(AuthToken $token): void
+    public function useAuthToken(PyrusAuthToken $token): void
     {
         $this->token = $token;
     }
@@ -34,7 +34,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
-    public function useAuthCredentials(Credentials $credentials): void
+    public function useAuthCredentials(PyrusCredentials $credentials): void
     {
         $this->token = null;
         $this->credentials = $credentials;
