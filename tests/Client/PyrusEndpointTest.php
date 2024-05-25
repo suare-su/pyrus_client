@@ -26,9 +26,56 @@ final class PyrusEndpointTest extends BaseCase
     public static function provideMethod(): array
     {
         return [
+            'get' => [
+                PyrusEndpoint::CATALOG_INDEX,
+                RequestMethod::GET,
+            ],
             'post' => [
                 PyrusEndpoint::AUTH,
                 RequestMethod::POST,
+            ],
+            'put' => [
+                PyrusEndpoint::CATALOG_CREATE,
+                RequestMethod::PUT,
+            ],
+        ];
+    }
+
+    /**
+     * @psalm-param scalar[] $params
+     *
+     * @dataProvider providePath
+     */
+    public function testPath(PyrusEndpoint $endpoint, array $params, \Exception|string $expected): void
+    {
+        if ($expected instanceof \Exception) {
+            $this->expectExceptionObject($expected);
+        }
+
+        $path = $endpoint->path($params);
+
+        if (!($expected instanceof \Exception)) {
+            $this->assertSame($expected, $path);
+        }
+    }
+
+    public static function providePath(): array
+    {
+        return [
+            'path without params' => [
+                PyrusEndpoint::AUTH,
+                [],
+                '/auth',
+            ],
+            'path with params' => [
+                PyrusEndpoint::CATALOG_UPDATE,
+                [123],
+                '/catalogs/123',
+            ],
+            'params count exception' => [
+                PyrusEndpoint::CATALOG_UPDATE,
+                [],
+                new \InvalidArgumentException('Number of params'),
             ],
         ];
     }

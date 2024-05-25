@@ -10,5 +10,6 @@ namespace SuareSu\PyrusClient\Transport;
 enum RequestMethod: string
 {
     case POST = 'POST';
+    case PUT = 'PUT';
     case GET = 'GET';
 }
