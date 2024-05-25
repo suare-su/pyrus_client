@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SuareSu\PyrusClient\Client;
+namespace SuareSu\PyrusClient\Pyrus;
 
 /**
  * Enum that contains all domains for Pyrus.

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace SuareSu\PyrusClient\Client;
+namespace SuareSu\PyrusClient\Pyrus;
 
-use SuareSu\PyrusClient\Transport\TransportMethod;
+use SuareSu\PyrusClient\Transport\RequestMethod;
 
 /**
  * Descriptions of all endpoints in Pyrus.
@@ -16,11 +16,11 @@ enum PyrusEndpoint: string
     /**
      * Returns HTTP method required for this endpoint.
      */
-    public function method(): TransportMethod
+    public function method(): RequestMethod
     {
         return match ($this) {
-            self::AUTH => TransportMethod::POST,
-            default => TransportMethod::GET,
+            self::AUTH => RequestMethod::POST,
+            default => RequestMethod::GET,
         };
     }
 }

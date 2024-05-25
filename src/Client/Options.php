@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SuareSu\PyrusClient\Client;
 
+use SuareSu\PyrusClient\Pyrus\PyrusDomain;
+
 /**
  * Object that stores and provides configuration for Pyrus client.
  */
