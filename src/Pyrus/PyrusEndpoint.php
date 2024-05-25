@@ -37,12 +37,11 @@ enum PyrusEndpoint
     public function method(): RequestMethod
     {
         return match ($this) {
-            self::AUTH,
+            self::AUTH => RequestMethod::POST,
+
+            self::CATALOG_INDEX, self::CATALOG_READ => RequestMethod::GET,
             self::CATALOG_UPDATE => RequestMethod::POST,
-
             self::CATALOG_CREATE => RequestMethod::PUT,
-
-            default => RequestMethod::GET,
         };
     }
 
