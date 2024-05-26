@@ -7,6 +7,7 @@ namespace SuareSu\PyrusClient\Client;
 use SuareSu\PyrusClient\Exception\PyrusApiException;
 use SuareSu\PyrusClient\Exception\PyrusDataConverterException;
 use SuareSu\PyrusClient\Exception\PyrusTransportException;
+use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 
 /**
  * Client that stores all Pyrus API calls and logic.
@@ -33,4 +34,14 @@ interface PyrusClient
      * @throws PyrusDataConverterException
      */
     public function auth(PyrusCredentials $credentials): PyrusAuthToken;
+
+    /**
+     * Request set enpoint with provided payload. Request will be automatically authorized.
+     *
+     * @param array<string, scalar>            $urlParams
+     * @param array<string, mixed>|object|null $payload
+     *
+     * @return array<string, mixed>
+     */
+    public function request(PyrusEndpoint $endpoint, array $urlParams = [], array|object|null $payload = null): array;
 }

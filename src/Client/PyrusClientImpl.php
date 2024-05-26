@@ -6,9 +6,11 @@ namespace SuareSu\PyrusClient\Client;
 
 use SuareSu\PyrusClient\DataConverter\PyrusDataConverter;
 use SuareSu\PyrusClient\Exception\PyrusApiException;
+use SuareSu\PyrusClient\Exception\PyrusApiUnauthorizedException;
 use SuareSu\PyrusClient\Exception\PyrusDataConverterException;
 use SuareSu\PyrusClient\Exception\PyrusTransportException;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
+use SuareSu\PyrusClient\Pyrus\PyrusHeader;
 use SuareSu\PyrusClient\Transport\PyrusRequest;
 use SuareSu\PyrusClient\Transport\PyrusRequestMethod;
 use SuareSu\PyrusClient\Transport\PyrusResponseStatus;
@@ -69,6 +71,28 @@ final class PyrusClientImpl implements PyrusClient
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function request(PyrusEndpoint $endpoint, array $urlParams = [], array|object|null $payload = null): array
+    {
+        $authToken = $this->getOrRequestAuthorizationToken()->accessToken;
+        $method = $endpoint->method();
+        $url = $this->createEndpointUrl($endpoint, $urlParams);
+        $headers = [
+            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken}",
+        ];
+
+        try {
+            $response = $this->requestInternal($method, $url, $payload, $headers);
+        } catch (PyrusApiUnauthorizedException $e) {
+            $this->token = null;
+            $response = $this->request($endpoint, $urlParams, $payload);
+        }
+
+        return $response;
+    }
+
+    /**
      * Return token if it presents. In other case tries to request it.
      */
     private function getOrRequestAuthorizationToken(): PyrusAuthToken
@@ -89,8 +113,8 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * Create and run a request to Pyrus using set data.
      *
-     * @param array<string, mixed>|object    $payload
-     * @param array<string, string|string[]> $headers
+     * @param array<string, mixed>|object|null $payload
+     * @param array<string, string|string[]>   $headers
      *
      * @psalm-param non-empty-string $url
      *
@@ -100,9 +124,9 @@ final class PyrusClientImpl implements PyrusClient
      * @throws PyrusApiException
      * @throws PyrusDataConverterException
      */
-    private function requestInternal(PyrusRequestMethod $method, string $url, array|object $payload = [], array $headers = []): array
+    private function requestInternal(PyrusRequestMethod $method, string $url, array|object|null $payload = null, array $headers = []): array
     {
-        $normalizedPayload = $this->dataConverter->normalize($payload);
+        $normalizedPayload = null === $payload ? null : $this->dataConverter->normalize($payload);
         $request = new PyrusRequest($method, $url, $normalizedPayload, $headers);
 
         try {
@@ -120,6 +144,10 @@ final class PyrusClientImpl implements PyrusClient
                 (string) $parsedResponse['error'],
                 (int) ($parsedResponse['error_code'] ?? 0)
             );
+        }
+
+        if (PyrusResponseStatus::UNAUTHORIZED === $response->status) {
+            throw new PyrusApiUnauthorizedException();
         }
 
         if (PyrusResponseStatus::OK !== $response->status) {

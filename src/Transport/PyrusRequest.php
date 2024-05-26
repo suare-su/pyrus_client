@@ -13,8 +13,8 @@ final class PyrusRequest
         public readonly PyrusRequestMethod $method,
         /** @psalm-var non-empty-string */
         public readonly string $url,
-        /** @var array<string, mixed> */
-        public readonly array $payload = [],
+        /** @var array<string, mixed>|null */
+        public readonly ?array $payload = null,
         /** @var array<string, string|string[]> */
         public readonly array $headers = [],
     ) {
