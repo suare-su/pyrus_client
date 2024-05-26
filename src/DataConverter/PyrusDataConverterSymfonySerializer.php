@@ -55,7 +55,7 @@ final class PyrusDataConverterSymfonySerializer implements PyrusDataConverter
     /**
      * {@inheritdoc}
      */
-    public function jsonDencode(string $json): array
+    public function jsonDecode(string $json): array
     {
         try {
             /** @psalm-var array<string, mixed>|scalar */

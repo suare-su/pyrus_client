@@ -36,5 +36,5 @@ interface PyrusDataConverter
      *
      * @throws PyrusDataConverterException
      */
-    public function jsonDencode(string $json): array;
+    public function jsonDecode(string $json): array;
 }

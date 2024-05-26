@@ -113,7 +113,7 @@ final class PyrusClientImpl implements PyrusClient
             throw new PyrusTransportException($e->getMessage(), 0, $e);
         }
 
-        $parsedResponse = $this->dataConverter->jsonDencode($response->payload);
+        $parsedResponse = $this->dataConverter->jsonDecode($response->payload);
 
         if (!empty($parsedResponse['error'])) {
             throw new PyrusApiException(
