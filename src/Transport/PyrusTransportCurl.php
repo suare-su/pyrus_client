@@ -14,6 +14,14 @@ final class PyrusTransportCurl implements PyrusTransport
      */
     public function request(PyrusRequest $request): PyrusResponse
     {
+        $headers = [];
+        foreach ($request->headers as $key => $value) {
+            $arValue = \is_array($value) ? $value : [$value];
+            foreach ($arValue as $arValueItem) {
+                $headers[] = "{$key}: {$arValueItem}";
+            }
+        }
+
         $options = [
             \CURLOPT_FOLLOWLOCATION => true,
             \CURLOPT_FRESH_CONNECT => true,
@@ -22,9 +30,7 @@ final class PyrusTransportCurl implements PyrusTransport
             \CURLOPT_RETURNTRANSFER => true,
             \CURLOPT_URL => $request->url,
             \CURLOPT_CUSTOMREQUEST => $request->method->value,
-            \CURLOPT_HTTPHEADER => [
-                'Content-type: application/json',
-            ],
+            \CURLOPT_HTTPHEADER => $headers,
             \CURLOPT_POSTFIELDS => json_encode($request->payload),
         ];
 

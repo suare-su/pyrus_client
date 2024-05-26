@@ -11,6 +11,7 @@ use SuareSu\PyrusClient\Client\PyrusCredentials;
 use SuareSu\PyrusClient\DataConverter\PyrusDataConverter;
 use SuareSu\PyrusClient\Pyrus\PyrusBaseUrl;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
+use SuareSu\PyrusClient\Pyrus\PyrusHeader;
 use SuareSu\PyrusClient\Tests\BaseCase;
 use SuareSu\PyrusClient\Transport\PyrusRequest;
 use SuareSu\PyrusClient\Transport\PyrusResponse;
@@ -46,7 +47,7 @@ final class PyrusClientImplTest extends BaseCase
                     fn (PyrusRequest $request): bool => $request->method === PyrusEndpoint::AUTH->method()
                         && $request->url === PyrusBaseUrl::ACCOUNTS->value . PyrusEndpoint::AUTH->path()
                         && $request->payload === $normalizedCredentials
-                        && [] === $request->headers
+                        && [PyrusHeader::CONTENT_TYPE->value => 'application/json'] === $request->headers
                 )
             )
             ->willReturn(

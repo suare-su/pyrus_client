@@ -10,4 +10,5 @@ namespace SuareSu\PyrusClient\Pyrus;
 enum PyrusHeader: string
 {
     case AUTHORIZATION = 'Authorization';
+    case CONTENT_TYPE = 'Content-type';
 }

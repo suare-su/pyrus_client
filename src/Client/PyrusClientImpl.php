@@ -127,6 +127,7 @@ final class PyrusClientImpl implements PyrusClient
     private function requestInternal(PyrusRequestMethod $method, string $url, array|object|null $payload = null, array $headers = []): array
     {
         $normalizedPayload = null === $payload ? null : $this->dataConverter->normalize($payload);
+        $headers[PyrusHeader::CONTENT_TYPE->value] = 'application/json';
         $request = new PyrusRequest($method, $url, $normalizedPayload, $headers);
 
         try {
