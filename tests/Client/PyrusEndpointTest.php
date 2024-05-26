@@ -9,8 +9,6 @@ use SuareSu\PyrusClient\Tests\BaseCase;
 use SuareSu\PyrusClient\Transport\PyrusRequestMethod;
 
 /**
- * Base test case for all tests.
- *
  * @internal
  */
 final class PyrusEndpointTest extends BaseCase

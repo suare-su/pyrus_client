@@ -59,7 +59,7 @@ final class PyrusDataConverterSymfonySerializer implements PyrusDataConverter
     {
         try {
             /** @psalm-var array<string, mixed>|scalar */
-            $res = $this->serializer->decode($json, 'json');
+            $res = json_decode(json: $json, associative: true, flags: \JSON_THROW_ON_ERROR);
         } catch (\Throwable $e) {
             throw new PyrusDataConverterException($e->getMessage(), (int) $e->getCode(), $e);
         }
