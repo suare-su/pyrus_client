@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SuareSu\PyrusClient\Client;
 
 use SuareSu\PyrusClient\Exception\PyrusApiException;
+use SuareSu\PyrusClient\Exception\PyrusDataConverterException;
 use SuareSu\PyrusClient\Exception\PyrusTransportException;
-use SuareSu\PyrusClient\Transport\Request;
 
 /**
  * Client that stores all Pyrus API calls and logic.
@@ -30,6 +30,7 @@ interface PyrusClient
      *
      * @throws PyrusTransportException
      * @throws PyrusApiException
+     * @throws PyrusDataConverterException
      */
     public function auth(PyrusCredentials $credentials): PyrusAuthToken;
 }

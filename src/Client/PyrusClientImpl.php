@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace SuareSu\PyrusClient\Client;
 
+use SuareSu\PyrusClient\DataConverter\PyrusDataConverter;
 use SuareSu\PyrusClient\Exception\PyrusApiException;
+use SuareSu\PyrusClient\Exception\PyrusDataConverterException;
 use SuareSu\PyrusClient\Exception\PyrusTransportException;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 use SuareSu\PyrusClient\Transport\PyrusRequest;
 use SuareSu\PyrusClient\Transport\PyrusRequestMethod;
-use SuareSu\PyrusClient\Transport\PyrusResponse;
 use SuareSu\PyrusClient\Transport\PyrusResponseStatus;
 use SuareSu\PyrusClient\Transport\PyrusTransport;
 
@@ -26,6 +27,7 @@ final class PyrusClientImpl implements PyrusClient
 
     public function __construct(
         private readonly PyrusTransport $transport,
+        private readonly PyrusDataConverter $dataConverter,
         private readonly PyrusClientOptions $options
     ) {
     }
@@ -53,24 +55,17 @@ final class PyrusClientImpl implements PyrusClient
     public function auth(PyrusCredentials $credentials): PyrusAuthToken
     {
         $method = PyrusEndpoint::AUTH->method();
-        $url = $this->createEndpointUrl(endpoint: PyrusEndpoint::AUTH, forceBaseUrl: $this->options->accountsBaseUrl);
-        $payload = [
-            'login' => $credentials->login,
-            'security_key' => $credentials->securityKey,
-        ];
-        if (null !== $credentials->personId) {
-            $payload['person_id'] = $credentials->personId;
-        }
+        $url = $this->createEndpointUrl(
+            endpoint: PyrusEndpoint::AUTH,
+            forceBaseUrl: $this->options->accountsBaseUrl
+        );
 
-        $response = $this->requestInternal($method, $url, $payload);
-        /** @psalm-var non-empty-string */
-        $accessToken = !empty($response['access_token']) && \is_string($response['access_token']) ? $response['access_token'] : '-';
-        /** @psalm-var non-empty-string */
-        $apiUrl = !empty($response['api_url']) && \is_string($response['api_url']) ? $response['api_url'] : '-';
-        /** @psalm-var non-empty-string */
-        $filesUrl = !empty($response['files_url']) && \is_string($response['files_url']) ? $response['files_url'] : '-';
+        $response = $this->requestInternal($method, $url, $credentials);
 
-        return new PyrusAuthToken($accessToken, $apiUrl, $filesUrl);
+        /** @var PyrusAuthToken */
+        $token = $this->dataConverter->denormalize($response, PyrusAuthToken::class);
+
+        return $token;
     }
 
     /**
@@ -94,7 +89,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * Create and run a request to Pyrus using set data.
      *
-     * @param array<string, mixed>           $payload
+     * @param array<string, mixed>|object    $payload
      * @param array<string, string|string[]> $headers
      *
      * @psalm-param non-empty-string $url
@@ -103,18 +98,22 @@ final class PyrusClientImpl implements PyrusClient
      *
      * @throws PyrusTransportException
      * @throws PyrusApiException
+     * @throws PyrusDataConverterException
      */
-    private function requestInternal(PyrusRequestMethod $method, string $url, array $payload = [], array $headers = []): array
+    private function requestInternal(PyrusRequestMethod $method, string $url, array|object $payload = [], array $headers = []): array
     {
+        $normalizedPayload = $this->dataConverter->normalize($payload);
+        $request = new PyrusRequest($method, $url, $normalizedPayload, $headers);
+
         try {
-            $request = new PyrusRequest($method, $url, $payload, $headers);
             $response = $this->transport->request($request);
-            $parsedResponse = $this->parseResponse($response);
         } catch (PyrusTransportException $e) {
             throw $e;
         } catch (\Throwable $e) {
             throw new PyrusTransportException($e->getMessage(), 0, $e);
         }
+
+        $parsedResponse = $this->dataConverter->jsonDencode($response->payload);
 
         if (!empty($parsedResponse['error'])) {
             throw new PyrusApiException(
@@ -143,18 +142,5 @@ final class PyrusClientImpl implements PyrusClient
         $path = $endpoint->path($urlParams);
 
         return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
-    }
-
-    /**
-     * Parses response from Pyrus to an associative array.
-     *
-     * @return array<string, mixed>
-     */
-    private function parseResponse(PyrusResponse $response): array
-    {
-        /** @var array<string, mixed> */
-        $res = json_decode($response->payload, true, 512, \JSON_THROW_ON_ERROR);
-
-        return $res;
     }
 }
