@@ -29,7 +29,7 @@ final class PyrusClientImplTest extends BaseCase
     {
         $credentials = new PyrusCredentials('test', 'test', 'test');
         $normalizedCredentials = [
-            'test' => 'test',
+            'test' => 'normalized_credentials',
         ];
 
         $authTokenJson = 'auth_token_json';
