@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SuareSu\PyrusClient\Tests\Client;
+namespace SuareSu\PyrusClient\Tests\Pyrus;
 
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 use SuareSu\PyrusClient\Tests\BaseCase;
