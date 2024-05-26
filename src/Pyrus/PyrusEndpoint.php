@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SuareSu\PyrusClient\Pyrus;
 
-use SuareSu\PyrusClient\Transport\RequestMethod;
+use SuareSu\PyrusClient\Transport\PyrusRequestMethod;
 
 /**
  * Descriptions of all endpoints in Pyrus.
@@ -20,6 +20,8 @@ enum PyrusEndpoint
 
     /**
      * Return path related to this enum item.
+     *
+     * @psalm-return non-empty-string
      */
     private function getInternalPath(): string
     {
@@ -34,14 +36,14 @@ enum PyrusEndpoint
     /**
      * Return HTTP method required for this endpoint.
      */
-    public function method(): RequestMethod
+    public function method(): PyrusRequestMethod
     {
         return match ($this) {
-            self::AUTH => RequestMethod::POST,
+            self::AUTH => PyrusRequestMethod::POST,
 
-            self::CATALOG_INDEX, self::CATALOG_READ => RequestMethod::GET,
-            self::CATALOG_UPDATE => RequestMethod::POST,
-            self::CATALOG_CREATE => RequestMethod::PUT,
+            self::CATALOG_INDEX, self::CATALOG_READ => PyrusRequestMethod::GET,
+            self::CATALOG_UPDATE => PyrusRequestMethod::POST,
+            self::CATALOG_CREATE => PyrusRequestMethod::PUT,
         };
     }
 
@@ -51,6 +53,8 @@ enum PyrusEndpoint
      * @param mixed[] $params
      *
      * @psalm-param scalar[] $params
+     *
+     * @psalm-return non-empty-string
      */
     public function path(array $params = []): string
     {
@@ -68,6 +72,9 @@ enum PyrusEndpoint
             $params
         );
 
-        return sprintf($path, ...$stringifiedParams);
+        /** @psalm-var non-empty-string */
+        $res = sprintf($path, ...$stringifiedParams);
+
+        return $res;
     }
 }

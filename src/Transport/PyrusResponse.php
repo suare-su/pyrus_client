@@ -7,10 +7,10 @@ namespace SuareSu\PyrusClient\Transport;
 /**
  * Object that contains data of a single response of Pyrus transport.
  */
-final class Response
+final class PyrusResponse
 {
     public function __construct(
-        public readonly ResponseStatus $status,
+        public readonly PyrusResponseStatus $status,
         public readonly string $payload,
     ) {
     }

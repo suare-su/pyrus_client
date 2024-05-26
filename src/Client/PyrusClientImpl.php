@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace SuareSu\PyrusClient\Client;
 
+use SuareSu\PyrusClient\Exception\PyrusApiException;
 use SuareSu\PyrusClient\Exception\PyrusTransportException;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
+use SuareSu\PyrusClient\Transport\PyrusRequest;
+use SuareSu\PyrusClient\Transport\PyrusRequestMethod;
+use SuareSu\PyrusClient\Transport\PyrusResponse;
+use SuareSu\PyrusClient\Transport\PyrusResponseStatus;
 use SuareSu\PyrusClient\Transport\PyrusTransport;
-use SuareSu\PyrusClient\Transport\Request;
-use SuareSu\PyrusClient\Transport\RequestMethod;
-use SuareSu\PyrusClient\Transport\Response;
 
 /**
  * Basic implementation for PyrusClient interface.
@@ -46,37 +48,113 @@ final class PyrusClientImpl implements PyrusClient
     }
 
     /**
-     * Create an absolute URL for provided Pyrus endpoint.
-     *
-     * @psalm-param scalar[] $params
+     * {@inheritdoc}
      */
-    private function createEndpointUrl(PyrusEndpoint $endpoint, array $params = [], ?string $forceBaseUrl = null): string
+    public function auth(PyrusCredentials $credentials): PyrusAuthToken
     {
-        $baseUrl = $forceBaseUrl ?? ($this->token?->apiUrl ?? $this->options->defaultBaseUrl);
-        $path = $endpoint->path($params);
+        $method = PyrusEndpoint::AUTH->method();
+        $url = $this->createEndpointUrl(endpoint: PyrusEndpoint::AUTH, forceBaseUrl: $this->options->accountsBaseUrl);
+        $payload = [
+            'login' => $credentials->login,
+            'security_key' => $credentials->securityKey,
+        ];
+        if (null !== $credentials->personId) {
+            $payload['person_id'] = $credentials->personId;
+        }
 
-        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+        $response = $this->requestInternal($method, $url, $payload);
+        /** @psalm-var non-empty-string */
+        $accessToken = !empty($response['access_token']) && \is_string($response['access_token']) ? $response['access_token'] : '-';
+        /** @psalm-var non-empty-string */
+        $apiUrl = !empty($response['api_url']) && \is_string($response['api_url']) ? $response['api_url'] : '-';
+        /** @psalm-var non-empty-string */
+        $filesUrl = !empty($response['files_url']) && \is_string($response['files_url']) ? $response['files_url'] : '-';
+
+        return new PyrusAuthToken($accessToken, $apiUrl, $filesUrl);
     }
 
     /**
-     * Request data from Pyrus API using provided data.
+     * Return token if it presents. In other case tries to request it.
+     */
+    private function getOrRequestAuthorizationToken(): PyrusAuthToken
+    {
+        if (null !== $this->token) {
+            return $this->token;
+        }
+
+        if (null === $this->credentials) {
+            throw new PyrusApiException('Please provide credentials or authorization token');
+        }
+
+        $this->token = $this->auth($this->credentials);
+
+        return $this->token;
+    }
+
+    /**
+     * Create and run a request to Pyrus using set data.
+     *
+     * @param array<string, mixed>           $payload
+     * @param array<string, string|string[]> $headers
      *
      * @psalm-param non-empty-string $url
-     * @psalm-param array<string, mixed> $payload
-     * @psalm-param array<string, string|string[]> $headers
+     *
+     * @return array<string, mixed>
+     *
+     * @throws PyrusTransportException
+     * @throws PyrusApiException
      */
-    private function requestPyrus(RequestMethod $method, string $url, array $payload, array $headers = []): Response
+    private function requestInternal(PyrusRequestMethod $method, string $url, array $payload = [], array $headers = []): array
     {
-        $request = new Request($url, $payload, $headers, $method);
-
         try {
+            $request = new PyrusRequest($method, $url, $payload, $headers);
             $response = $this->transport->request($request);
+            $parsedResponse = $this->parseResponse($response);
         } catch (PyrusTransportException $e) {
             throw $e;
         } catch (\Throwable $e) {
             throw new PyrusTransportException($e->getMessage(), 0, $e);
         }
 
-        return $response;
+        if (!empty($parsedResponse['error'])) {
+            throw new PyrusApiException(
+                (string) $parsedResponse['error'],
+                (int) ($parsedResponse['error_code'] ?? 0)
+            );
+        }
+
+        if (PyrusResponseStatus::OK !== $response->status) {
+            throw new PyrusTransportException("Bad response status: {$response->status->value}");
+        }
+
+        return $parsedResponse;
+    }
+
+    /**
+     * Create an absolute URL for provided Pyrus endpoint.
+     *
+     * @psalm-param scalar[] $urlParams
+     *
+     * @psalm-return non-empty-string
+     */
+    private function createEndpointUrl(PyrusEndpoint $endpoint, array $urlParams = [], ?string $forceBaseUrl = null): string
+    {
+        $baseUrl = $forceBaseUrl ?? ($this->token?->apiUrl ?? $this->options->defaultBaseUrl);
+        $path = $endpoint->path($urlParams);
+
+        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+    }
+
+    /**
+     * Parses response from Pyrus to an associative array.
+     *
+     * @return array<string, mixed>
+     */
+    private function parseResponse(PyrusResponse $response): array
+    {
+        /** @var array<string, mixed> */
+        $res = json_decode($response->payload, true, 512, \JSON_THROW_ON_ERROR);
+
+        return $res;
     }
 }

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace SuareSu\PyrusClient\Client;
 
+use SuareSu\PyrusClient\Exception\PyrusApiException;
+use SuareSu\PyrusClient\Exception\PyrusTransportException;
+use SuareSu\PyrusClient\Transport\Request;
+
 /**
  * Client that stores all Pyrus API calls and logic.
  *
@@ -20,4 +24,12 @@ interface PyrusClient
      * Client will clear all authorisation info and try to get a new token for the provided credentials.
      */
     public function useAuthCredentials(PyrusCredentials $credentials): void;
+
+    /**
+     * Run authorization request and return auth token.
+     *
+     * @throws PyrusTransportException
+     * @throws PyrusApiException
+     */
+    public function auth(PyrusCredentials $credentials): PyrusAuthToken;
 }

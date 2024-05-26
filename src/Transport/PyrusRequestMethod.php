@@ -7,7 +7,7 @@ namespace SuareSu\PyrusClient\Transport;
 /**
  * List of allowed HTTP methods.
  */
-enum RequestMethod: string
+enum PyrusRequestMethod: string
 {
     case POST = 'POST';
     case PUT = 'PUT';

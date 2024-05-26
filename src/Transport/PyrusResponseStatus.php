@@ -7,7 +7,7 @@ namespace SuareSu\PyrusClient\Transport;
 /**
  * List of HTTP reponses.
  */
-enum ResponseStatus: int
+enum PyrusResponseStatus: int
 {
     case OK = 200;
     case SERVER_ERROR = 500;

@@ -6,7 +6,7 @@ namespace SuareSu\PyrusClient\Tests\Client;
 
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 use SuareSu\PyrusClient\Tests\BaseCase;
-use SuareSu\PyrusClient\Transport\RequestMethod;
+use SuareSu\PyrusClient\Transport\PyrusRequestMethod;
 
 /**
  * Base test case for all tests.
@@ -18,7 +18,7 @@ final class PyrusEndpointTest extends BaseCase
     /**
      * @dataProvider provideMethod
      */
-    public function testMethod(PyrusEndpoint $endpoint, RequestMethod $expectedMethod): void
+    public function testMethod(PyrusEndpoint $endpoint, PyrusRequestMethod $expectedMethod): void
     {
         $this->assertSame($expectedMethod, $endpoint->method());
     }
@@ -28,15 +28,15 @@ final class PyrusEndpointTest extends BaseCase
         return [
             'get' => [
                 PyrusEndpoint::CATALOG_INDEX,
-                RequestMethod::GET,
+                PyrusRequestMethod::GET,
             ],
             'post' => [
                 PyrusEndpoint::AUTH,
-                RequestMethod::POST,
+                PyrusRequestMethod::POST,
             ],
             'put' => [
                 PyrusEndpoint::CATALOG_CREATE,
-                RequestMethod::PUT,
+                PyrusRequestMethod::PUT,
             ],
         ];
     }
