@@ -12,9 +12,6 @@ use SuareSu\PyrusClient\Pyrus\PyrusBaseUrl;
 final class PyrusClientOptions
 {
     /** @psalm-var non-empty-string */
-    public readonly string $defaultBaseUrl;
-
-    /** @psalm-var non-empty-string */
     public readonly string $accountsBaseUrl;
 
     /**
@@ -22,11 +19,8 @@ final class PyrusClientOptions
      */
     public function __construct(
         /* @psalm-var non-empty-string|PyrusBaseUrl */
-        string|PyrusBaseUrl $defaultBaseUrl = PyrusBaseUrl::API,
-        /* @psalm-var non-empty-string|PyrusBaseUrl */
         string|PyrusBaseUrl $accountsBaseUrl = PyrusBaseUrl::ACCOUNTS
     ) {
-        $this->defaultBaseUrl = $defaultBaseUrl instanceof PyrusBaseUrl ? $defaultBaseUrl->value : $defaultBaseUrl;
         $this->accountsBaseUrl = $accountsBaseUrl instanceof PyrusBaseUrl ? $accountsBaseUrl->value : $accountsBaseUrl;
     }
 }
