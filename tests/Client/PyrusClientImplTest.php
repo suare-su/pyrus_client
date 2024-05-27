@@ -157,6 +157,87 @@ final class PyrusClientImplTest extends BaseCase
     /**
      * @test
      */
+    public function testRequestWithTokenRefresh(): void
+    {
+        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+
+        $tokenString = 'token string';
+        $token = [
+            'test' => 'response',
+        ];
+
+        $responseString = 'response string';
+        $response = [
+            'test' => 'response',
+        ];
+
+        $credentials = new PyrusCredentials('login', 'securityKey');
+        $authToken = new PyrusAuthToken('old token', 'https://test.api', 'test');
+        $refreshedAuthToken = new PyrusAuthToken('new token', 'https://test.api', 'test');
+
+        $transport = $this->mock(PyrusTransport::class);
+        $transport->expects($this->exactly(3))
+            ->method('request')
+            ->willReturnCallback(
+                function (PyrusRequest $request) use ($endpoint, $authToken, $refreshedAuthToken, $tokenString, $responseString): PyrusResponse {
+                    if (
+                        str_ends_with($request->url, $endpoint->path())
+                        && isset($request->headers[PyrusHeader::AUTHORIZATION->value])
+                    ) {
+                        $authHeader = $request->headers[PyrusHeader::AUTHORIZATION->value];
+                        if ($authHeader === "Bearer {$authToken->accessToken}") {
+                            return new PyrusResponse(PyrusResponseStatus::UNAUTHORIZED, '');
+                        } elseif ($authHeader === "Bearer {$refreshedAuthToken->accessToken}") {
+                            return new PyrusResponse(PyrusResponseStatus::OK, $responseString);
+                        }
+                    }
+                    if (str_ends_with($request->url, PyrusEndpoint::AUTH->path())) {
+                        return new PyrusResponse(PyrusResponseStatus::OK, $tokenString);
+                    }
+
+                    return new PyrusResponse(PyrusResponseStatus::SERVER_ERROR, '');
+                }
+            );
+
+        $dataConverter = $this->mock(PyrusDataConverter::class);
+        $dataConverter->expects($this->once())
+            ->method('normalize')
+            ->with(
+                $this->identicalTo($credentials)
+            )
+            ->willReturn([]);
+        $dataConverter->expects($this->once())
+            ->method('denormalize')
+            ->with(
+                $this->identicalTo($token),
+                $this->identicalTo(PyrusAuthToken::class)
+            )
+            ->willReturn($refreshedAuthToken);
+        $dataConverter->expects($this->exactly(3))
+            ->method('jsonDecode')
+            ->willReturnCallback(
+                fn (string $payload): array => match ($payload) {
+                    $tokenString => $token,
+                    $responseString => $response,
+                    default => [],
+                }
+            );
+
+        $client = new PyrusClientImpl(
+            $transport,
+            $dataConverter,
+            new PyrusClientOptions()
+        );
+        $client->useAuthCredentials($credentials);
+        $client->useAuthToken($authToken);
+        $res = $client->request($endpoint);
+
+        $this->assertSame($response, $res);
+    }
+
+    /**
+     * @test
+     */
     public function testRequestTransportException(): void
     {
         $endpoint = PyrusEndpoint::CATALOG_INDEX;
