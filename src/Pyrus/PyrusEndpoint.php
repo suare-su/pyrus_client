@@ -50,9 +50,7 @@ enum PyrusEndpoint
     /**
      * Return path string with placeholders substituted by params.
      *
-     * @param mixed[] $params
-     *
-     * @psalm-param scalar[] $params
+     * @param array<float|int|string> $params
      *
      * @psalm-return non-empty-string
      */
@@ -67,13 +65,8 @@ enum PyrusEndpoint
             throw new \InvalidArgumentException('Number of params must be equal to a number of placeholders');
         }
 
-        $stringifiedParams = array_map(
-            fn (mixed $item): string => (string) $item,
-            $params
-        );
-
         /** @psalm-var non-empty-string */
-        $res = sprintf($path, ...$stringifiedParams);
+        $res = sprintf($path, ...$params);
 
         return $res;
     }

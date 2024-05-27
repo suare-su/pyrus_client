@@ -159,7 +159,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * Create an absolute URL for provided Pyrus endpoint.
      *
-     * @psalm-param scalar[] $urlParams
+     * @param array<float|int|string> $urlParams
      *
      * @psalm-return non-empty-string
      */

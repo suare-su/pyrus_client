@@ -11,6 +11,12 @@
     "mutators": {
         "@default": true,
         "CastString": false,
-        "CastInt": false
+        "CastInt": false,
+        "MatchArmRemoval": {
+            "ignore": [
+                "SuareSu\\PyrusClient\\Pyrus\\PyrusEndpoint::getInternalPath",
+                "SuareSu\\PyrusClient\\Pyrus\\PyrusEndpoint::method"
+            ]
+        }
     }
 }

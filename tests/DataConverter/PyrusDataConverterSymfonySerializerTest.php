@@ -23,6 +23,7 @@ final class PyrusDataConverterSymfonySerializerTest extends BaseCase
         $data = new \stdClass();
         $normalizedData = [
             'test_key' => 'test value',
+            'test_key_1' => 'test value 1',
         ];
 
         $serializer = $this->mock(Serializer::class);

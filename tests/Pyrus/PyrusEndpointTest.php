@@ -40,7 +40,7 @@ final class PyrusEndpointTest extends BaseCase
     }
 
     /**
-     * @psalm-param scalar[] $params
+     * @param array<float|int|string> $params
      *
      * @dataProvider providePath
      */

@@ -38,7 +38,7 @@ interface PyrusClient
     /**
      * Request set enpoint with provided payload. Request will be automatically authorized.
      *
-     * @param scalar[]                         $urlParams
+     * @param array<float|int|string>          $urlParams
      * @param array<string, mixed>|object|null $payload
      *
      * @return array<string, mixed>
