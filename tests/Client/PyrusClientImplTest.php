@@ -107,9 +107,10 @@ final class PyrusClientImplTest extends BaseCase
         $responseString = 'qwe';
         $response = [
             'test' => 'response',
+            'test_1' => 'response 1',
         ];
 
-        $authToken = new PyrusAuthToken('test', 'https://test.api', 'test');
+        $authToken = new PyrusAuthToken('test', 'https://test.api/', 'test');
 
         $transport = $this->mock(PyrusTransport::class);
         $transport->expects($this->once())
@@ -117,7 +118,7 @@ final class PyrusClientImplTest extends BaseCase
             ->with(
                 $this->callback(
                     fn (PyrusRequest $request): bool => $request->method === $endpoint->method()
-                        && $request->url === $authToken->apiUrl . $endpoint->path($urlParams)
+                        && $request->url === rtrim($authToken->apiUrl, '/') . $endpoint->path($urlParams)
                         && $request->payload === $normalizedPayload
                         && $request->headers === [
                             PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
@@ -305,6 +306,47 @@ final class PyrusClientImplTest extends BaseCase
         $this->expectException(PyrusApiException::class);
         $this->expectExceptionMessage($response['error']);
         $this->expectExceptionCode($response['error_code']);
+        $client->request($endpoint);
+    }
+
+    /**
+     * @test
+     */
+    public function testRequestApiExceptionNoErrorCode(): void
+    {
+        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $responseString = 'qwe';
+        $response = [
+            'error' => 'api error',
+        ];
+
+        $authToken = new PyrusAuthToken('test', 'https://test.api', 'test');
+
+        $transport = $this->mock(PyrusTransport::class);
+        $transport->expects($this->once())
+            ->method('request')
+            ->willReturn(
+                new PyrusResponse(PyrusResponseStatus::OK, $responseString)
+            );
+
+        $dataConverter = $this->mock(PyrusDataConverter::class);
+        $dataConverter->expects($this->once())
+            ->method('jsonDecode')
+            ->with(
+                $this->identicalTo($responseString)
+            )
+            ->willReturn($response);
+
+        $client = new PyrusClientImpl(
+            $transport,
+            $dataConverter,
+            new PyrusClientOptions()
+        );
+        $client->useAuthToken($authToken);
+
+        $this->expectException(PyrusApiException::class);
+        $this->expectExceptionMessage($response['error']);
+        $this->expectExceptionCode(0);
         $client->request($endpoint);
     }
 

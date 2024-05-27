@@ -133,7 +133,7 @@ final class PyrusClientImpl implements PyrusClient
         try {
             $response = $this->transport->request($request);
         } catch (\Throwable $e) {
-            throw new PyrusTransportException($e->getMessage(), 0, $e);
+            throw new PyrusTransportException(message: $e->getMessage(), previous: $e);
         }
 
         $parsedResponse = $this->dataConverter->jsonDecode($response->payload);
