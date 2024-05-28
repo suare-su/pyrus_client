@@ -9,6 +9,7 @@ use SuareSu\PyrusClient\Client\PyrusClientImpl;
 use SuareSu\PyrusClient\Client\PyrusClientOptions;
 use SuareSu\PyrusClient\Client\PyrusCredentials;
 use SuareSu\PyrusClient\Exception\PyrusApiException;
+use SuareSu\PyrusClient\Exception\PyrusApiUnauthorizedException;
 use SuareSu\PyrusClient\Exception\PyrusTransportException;
 use SuareSu\PyrusClient\Pyrus\PyrusBaseUrl;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
@@ -115,14 +116,14 @@ final class PyrusClientImplTest extends BaseCase
     public function testRequestWithTokenRefresh(): void
     {
         $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $response = [
+            'test' => 'response',
+            'test_1' => 'response 1',
+        ];
         $tokenResponse = [
             'access_token' => 'access_token_1',
             'api_url' => 'api_url_1',
             'files_url' => 'files_url_1',
-        ];
-        $response = [
-            'test' => 'response',
-            'test_1' => 'response 1',
         ];
         $credentials = $this->createCredentials();
         $authToken = $this->createAuthToken();
@@ -140,6 +141,7 @@ final class PyrusClientImplTest extends BaseCase
                             return $this->createPyrusResponse($response);
                         }
                     }
+
                     if (str_ends_with($request->url, PyrusEndpoint::AUTH->path())) {
                         return $this->createPyrusResponse($tokenResponse);
                     }
@@ -154,6 +156,43 @@ final class PyrusClientImplTest extends BaseCase
         $res = $client->request($endpoint);
 
         $this->assertSame($response, $res);
+    }
+
+    /**
+     * @test
+     */
+    public function testRequestWithTokenRefreshAuthorizationIsNotAllowed(): void
+    {
+        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $tokenResponse = [
+            'access_token' => 'access_token_1',
+            'api_url' => 'api_url_1',
+            'files_url' => 'files_url_1',
+        ];
+        $credentials = $this->createCredentials();
+        $authToken = $this->createAuthToken();
+
+        $transport = $this->mock(PyrusTransport::class);
+        $transport->expects($this->exactly(3))
+            ->method('request')
+            ->willReturnCallback(
+                function (PyrusRequest $request) use ($endpoint, $tokenResponse): PyrusResponse {
+                    if (str_ends_with($request->url, $endpoint->path())) {
+                        return $this->createPyrusResponse(status: PyrusResponseStatus::UNAUTHORIZED);
+                    } elseif (str_ends_with($request->url, PyrusEndpoint::AUTH->path())) {
+                        return $this->createPyrusResponse($tokenResponse);
+                    } else {
+                        return $this->createPyrusResponse(status: PyrusResponseStatus::SERVER_ERROR);
+                    }
+                }
+            );
+
+        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
+        $client->useAuthCredentials($credentials);
+        $client->useAuthToken($authToken);
+
+        $this->expectException(PyrusApiUnauthorizedException::class);
+        $client->request($endpoint);
     }
 
     /**

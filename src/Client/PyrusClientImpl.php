@@ -26,6 +26,8 @@ final class PyrusClientImpl implements PyrusClient
 
     private ?PyrusCredentials $credentials = null;
 
+    private bool $isAuthTokenRefreshing = false;
+
     public function __construct(
         private readonly PyrusTransport $transport,
         private readonly PyrusClientOptions $options
@@ -91,8 +93,14 @@ final class PyrusClientImpl implements PyrusClient
         try {
             $response = $this->requestInternal($method, $url, $payload, $headers);
         } catch (PyrusApiUnauthorizedException $e) {
-            $this->token = null;
-            $response = $this->request($endpoint, $urlParams, $payload);
+            if ($this->isAuthTokenRefreshing) {
+                throw $e;
+            } else {
+                $this->token = null;
+                $this->isAuthTokenRefreshing = true;
+                $response = $this->request($endpoint, $urlParams, $payload);
+                $this->isAuthTokenRefreshing = false;
+            }
         }
 
         return $response;
