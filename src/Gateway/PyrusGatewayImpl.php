@@ -7,6 +7,7 @@ namespace SuareSu\PyrusClient\Gateway;
 use SuareSu\PyrusClient\Client\PyrusAuthToken;
 use SuareSu\PyrusClient\Client\PyrusClient;
 use SuareSu\PyrusClient\Client\PyrusCredentials;
+use SuareSu\PyrusClient\DataConverter\PyrusDataConverter;
 
 /**
  * Basic implementation for PyrusGateway.
@@ -14,7 +15,8 @@ use SuareSu\PyrusClient\Client\PyrusCredentials;
 final class PyrusGatewayImpl implements PyrusGateway
 {
     public function __construct(
-        private readonly PyrusClient $client
+        private readonly PyrusClient $client,
+        private readonly PyrusDataConverter $dataConverter
     ) {
     }
 

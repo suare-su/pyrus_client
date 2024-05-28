@@ -7,6 +7,7 @@ namespace SuareSu\PyrusClient\Tests\Gateway;
 use SuareSu\PyrusClient\Client\PyrusAuthToken;
 use SuareSu\PyrusClient\Client\PyrusClient;
 use SuareSu\PyrusClient\Client\PyrusCredentials;
+use SuareSu\PyrusClient\DataConverter\PyrusDataConverter;
 use SuareSu\PyrusClient\Gateway\PyrusGatewayImpl;
 use SuareSu\PyrusClient\Tests\BaseCase;
 
@@ -29,7 +30,9 @@ final class PyrusGatewayImplTest extends BaseCase
                 $this->identicalTo($token)
             );
 
-        $gateway = new PyrusGatewayImpl($client);
+        $dataConverter = $this->mock(PyrusDataConverter::class);
+
+        $gateway = new PyrusGatewayImpl($client, $dataConverter);
         $gateway->useAuthToken($token);
     }
 
@@ -47,7 +50,9 @@ final class PyrusGatewayImplTest extends BaseCase
                 $this->identicalTo($credentials)
             );
 
-        $gateway = new PyrusGatewayImpl($client);
+        $dataConverter = $this->mock(PyrusDataConverter::class);
+
+        $gateway = new PyrusGatewayImpl($client, $dataConverter);
         $gateway->useAuthCredentials($credentials);
     }
 }
