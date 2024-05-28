@@ -6,6 +6,7 @@ namespace SuareSu\PyrusClient\Gateway;
 
 use SuareSu\PyrusClient\Client\PyrusAuthToken;
 use SuareSu\PyrusClient\Client\PyrusCredentials;
+use SuareSu\PyrusClient\Entity\Catalog;
 
 /**
  * Object that implements all concrete requests for Pyrus.
@@ -23,4 +24,11 @@ interface PyrusGateway
      * Client will clear all authorisation info and try to get a new token for the provided credentials.
      */
     public function useAuthCredentials(PyrusCredentials $credentials): void;
+
+    /**
+     * @return array<int, Catalog>
+     */
+    public function getCatalogs(): array;
+
+    public function getCatalog(int $id, bool $includeDeleted = false): Catalog;
 }
