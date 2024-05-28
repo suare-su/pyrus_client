@@ -129,7 +129,7 @@ final class PyrusClientImplTest extends BaseCase
         $authToken = $this->createAuthToken();
 
         $transport = $this->mock(PyrusTransport::class);
-        $transport->expects($this->exactly(3))
+        $transport->expects($this->exactly(6))
             ->method('request')
             ->willReturnCallback(
                 function (PyrusRequest $request) use ($endpoint, $authToken, $response, $tokenResponse): PyrusResponse {
@@ -154,8 +154,11 @@ final class PyrusClientImplTest extends BaseCase
         $client->useAuthCredentials($credentials);
         $client->useAuthToken($authToken);
         $res = $client->request($endpoint);
+        $client->useAuthToken($authToken);
+        $res1 = $client->request($endpoint);
 
-        $this->assertSame($response, $res);
+        $this->assertSame($response, $res, 'Token was successfully refreshed');
+        $this->assertSame($response, $res1, 'Object is able to refresh token again');
     }
 
     /**
