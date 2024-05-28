@@ -8,6 +8,8 @@ use SuareSu\PyrusClient\Exception\PyrusDataConverterException;
 
 /**
  * Object that converts data between request/response payload and internal objects.
+ *
+ * @psalm-api
  */
 interface PyrusDataConverter
 {

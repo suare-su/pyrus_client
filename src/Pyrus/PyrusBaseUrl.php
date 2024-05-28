@@ -6,6 +6,8 @@ namespace SuareSu\PyrusClient\Pyrus;
 
 /**
  * Enum that contains all domains for Pyrus.
+ *
+ * @psalm-api
  */
 enum PyrusBaseUrl: string
 {

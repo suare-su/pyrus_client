@@ -7,7 +7,9 @@ namespace SuareSu\PyrusClient\Transport;
 use SuareSu\PyrusClient\Client\PyrusClientOptions;
 
 /**
- * Facade for HTTP client. Converts data and throws errors.
+ * Facade for HTTP client.
+ *
+ * @psalm-api
  */
 interface PyrusTransport
 {

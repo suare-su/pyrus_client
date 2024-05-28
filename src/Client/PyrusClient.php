@@ -10,7 +10,7 @@ use SuareSu\PyrusClient\Exception\PyrusTransportException;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 
 /**
- * Client that stores all Pyrus API calls and logic.
+ * Object that implements common logic for all requests.
  *
  * @psalm-api
  */

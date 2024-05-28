@@ -8,6 +8,8 @@ use SuareSu\PyrusClient\Transport\PyrusRequestMethod;
 
 /**
  * Descriptions of all endpoints in Pyrus.
+ *
+ * @psalm-api
  */
 enum PyrusEndpoint
 {

@@ -6,6 +6,8 @@ namespace SuareSu\PyrusClient\Pyrus;
 
 /**
  * List of specific Pyrus HTTP headers.
+ *
+ * @psalm-api
  */
 enum PyrusHeader: string
 {
