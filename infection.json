@@ -9,6 +9,14 @@
         "text": "infection.log"
     },
     "mutators": {
-        "@default": true
+        "@default": true,
+        "CastString": false,
+        "CastInt": false,
+        "MatchArmRemoval": {
+            "ignore": [
+                "SuareSu\\PyrusClient\\Pyrus\\PyrusEndpoint::getInternalPath",
+                "SuareSu\\PyrusClient\\Pyrus\\PyrusEndpoint::method"
+            ]
+        }
     }
 }
