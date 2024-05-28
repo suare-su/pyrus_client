@@ -58,7 +58,7 @@ final class PyrusClientImplTest extends BaseCase
                 $this->createPyrusResponse($response)
             );
 
-        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
+        $client = new PyrusClientImpl($transport, $this->createOptions());
         $authToken = $client->auth($credentials);
 
         $this->assertSame($response['access_token'], $authToken->accessToken);
@@ -85,6 +85,8 @@ final class PyrusClientImplTest extends BaseCase
 
         $authToken = $this->createAuthToken();
 
+        $options = $this->createOptions();
+
         $transport = $this->mock(PyrusTransport::class);
         $transport->expects($this->once())
             ->method('request')
@@ -97,13 +99,14 @@ final class PyrusClientImplTest extends BaseCase
                             PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
                             PyrusHeader::CONTENT_TYPE->value => 'application/json',
                         ]
-                )
+                ),
+                $this->identicalTo($options)
             )
             ->willReturn(
                 $this->createPyrusResponse($response)
             );
 
-        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
+        $client = new PyrusClientImpl($transport, $options);
         $client->useAuthToken($authToken);
         $res = $client->request($endpoint, $urlParams, $payload);
 
@@ -150,7 +153,7 @@ final class PyrusClientImplTest extends BaseCase
                 }
             );
 
-        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
+        $client = new PyrusClientImpl($transport, $this->createOptions());
         $client->useAuthCredentials($credentials);
         $client->useAuthToken($authToken);
         $res = $client->request($endpoint);
@@ -190,7 +193,7 @@ final class PyrusClientImplTest extends BaseCase
                 }
             );
 
-        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
+        $client = new PyrusClientImpl($transport, $this->createOptions());
         $client->useAuthCredentials($credentials);
         $client->useAuthToken($authToken);
 
@@ -214,7 +217,7 @@ final class PyrusClientImplTest extends BaseCase
                 new \RuntimeException($exceptionMessage)
             );
 
-        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
+        $client = new PyrusClientImpl($transport, $this->createOptions());
         $client->useAuthToken($authToken);
 
         $this->expectException(PyrusTransportException::class);
@@ -241,7 +244,7 @@ final class PyrusClientImplTest extends BaseCase
                 $this->createPyrusResponse($response)
             );
 
-        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
+        $client = new PyrusClientImpl($transport, $this->createOptions());
         $client->useAuthToken($authToken);
 
         $this->expectException(PyrusApiException::class);
@@ -268,7 +271,7 @@ final class PyrusClientImplTest extends BaseCase
                 $this->createPyrusResponse($response)
             );
 
-        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
+        $client = new PyrusClientImpl($transport, $this->createOptions());
         $client->useAuthToken($authToken);
 
         $this->expectException(PyrusApiException::class);
@@ -292,7 +295,7 @@ final class PyrusClientImplTest extends BaseCase
                 $this->createPyrusResponse(status: PyrusResponseStatus::SERVER_ERROR)
             );
 
-        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
+        $client = new PyrusClientImpl($transport, $this->createOptions());
         $client->useAuthToken($authToken);
 
         $this->expectException(PyrusTransportException::class);
@@ -308,7 +311,7 @@ final class PyrusClientImplTest extends BaseCase
         $endpoint = PyrusEndpoint::CATALOG_INDEX;
         $transport = $this->mock(PyrusTransport::class);
 
-        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
+        $client = new PyrusClientImpl($transport, $this->createOptions());
 
         $this->expectException(PyrusApiException::class);
         $this->expectExceptionMessage('Please provide credentials or authorization token');
@@ -337,6 +340,14 @@ final class PyrusClientImplTest extends BaseCase
             'https://test.api/',
             'https://test.files/'
         );
+    }
+
+    /**
+     * Create client options mock to use in tests.
+     */
+    private function createOptions(): PyrusClientOptions
+    {
+        return new PyrusClientOptions();
     }
 
     /**

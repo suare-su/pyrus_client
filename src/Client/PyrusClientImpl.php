@@ -144,7 +144,7 @@ final class PyrusClientImpl implements PyrusClient
 
         try {
             $request = new PyrusRequest($method, $url, $payload, $headers);
-            $response = $this->transport->request($request);
+            $response = $this->transport->request($request, $this->options);
         } catch (\Throwable $e) {
             throw new PyrusTransportException(message: $e->getMessage(), previous: $e);
         }
