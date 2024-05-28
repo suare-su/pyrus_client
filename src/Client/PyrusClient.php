@@ -38,10 +38,10 @@ interface PyrusClient
     /**
      * Request set enpoint with provided payload. Request will be automatically authorized.
      *
-     * @param array<float|int|string>          $urlParams
-     * @param array<string, mixed>|object|null $payload
+     * @param array<float|int|string>   $urlParams
+     * @param array<string, mixed>|null $payload
      *
      * @return array<string, mixed>
      */
-    public function request(PyrusEndpoint $endpoint, array $urlParams = [], array|object|null $payload = null): array;
+    public function request(PyrusEndpoint $endpoint, array $urlParams = [], ?array $payload = null): array;
 }

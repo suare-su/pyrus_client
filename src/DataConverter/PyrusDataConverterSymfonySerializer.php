@@ -51,19 +51,4 @@ final class PyrusDataConverterSymfonySerializer implements PyrusDataConverter
 
         return $denormalizedData;
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonDecode(string $json): array
-    {
-        try {
-            /** @psalm-var array<string, mixed>|scalar */
-            $res = json_decode(json: $json, associative: true, flags: \JSON_THROW_ON_ERROR);
-        } catch (\Throwable $e) {
-            throw new PyrusDataConverterException($e->getMessage(), (int) $e->getCode(), $e);
-        }
-
-        return \is_array($res) ? $res : [];
-    }
 }

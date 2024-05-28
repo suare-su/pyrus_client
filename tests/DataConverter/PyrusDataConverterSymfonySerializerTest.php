@@ -114,39 +114,4 @@ final class PyrusDataConverterSymfonySerializerTest extends BaseCase
         $this->expectExceptionObject($expectedException);
         $dataConverter->denormalize($data, $type);
     }
-
-    /**
-     * @test
-     */
-    public function testJsonDecode(): void
-    {
-        $data = '{"test_key":"test value"}';
-        $decodedData = [
-            'test_key' => 'test value',
-        ];
-
-        $serializer = $this->mock(Serializer::class);
-
-        $dataConverter = new PyrusDataConverterSymfonySerializer($serializer);
-        $res = $dataConverter->jsonDecode($data);
-
-        $this->assertSame($decodedData, $res);
-    }
-
-    /**
-     * @test
-     */
-    public function testJsonDecodeException(): void
-    {
-        $data = '{"test_key":';
-        $exceptionMessage = 'Syntax error';
-        $expectedException = new PyrusDataConverterException($exceptionMessage, 4);
-
-        $serializer = $this->mock(Serializer::class);
-
-        $dataConverter = new PyrusDataConverterSymfonySerializer($serializer);
-
-        $this->expectExceptionObject($expectedException);
-        $dataConverter->jsonDecode($data);
-    }
 }

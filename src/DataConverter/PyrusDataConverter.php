@@ -28,13 +28,4 @@ interface PyrusDataConverter
      * @throws PyrusDataConverterException
      */
     public function denormalize(mixed $data, string $type): object|array;
-
-    /**
-     * Convert json text to an associative array.
-     *
-     * @return array<string, mixed>
-     *
-     * @throws PyrusDataConverterException
-     */
-    public function jsonDecode(string $json): array;
 }

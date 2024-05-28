@@ -8,7 +8,6 @@ use SuareSu\PyrusClient\Client\PyrusAuthToken;
 use SuareSu\PyrusClient\Client\PyrusClientImpl;
 use SuareSu\PyrusClient\Client\PyrusClientOptions;
 use SuareSu\PyrusClient\Client\PyrusCredentials;
-use SuareSu\PyrusClient\DataConverter\PyrusDataConverter;
 use SuareSu\PyrusClient\Exception\PyrusApiException;
 use SuareSu\PyrusClient\Exception\PyrusTransportException;
 use SuareSu\PyrusClient\Pyrus\PyrusBaseUrl;
@@ -30,16 +29,12 @@ final class PyrusClientImplTest extends BaseCase
      */
     public function testAuth(): void
     {
-        $credentials = new PyrusCredentials('test', 'test', 'test');
-        $normalizedCredentials = [
-            'test' => 'normalized_credentials',
+        $credentials = $this->createCredentials();
+        $response = [
+            'access_token' => 'access_token',
+            'api_url' => 'api_url',
+            'files_url' => 'files_url',
         ];
-
-        $authTokenJson = 'auth_token_json';
-        $authTokenArray = [
-            'test' => 'auth_token_json',
-        ];
-        $authToken = new PyrusAuthToken('test', 'test', 'test');
 
         $transport = $this->mock(PyrusTransport::class);
         $transport->expects($this->once())
@@ -48,45 +43,26 @@ final class PyrusClientImplTest extends BaseCase
                 $this->callback(
                     fn (PyrusRequest $request): bool => $request->method === PyrusEndpoint::AUTH->method()
                         && $request->url === PyrusBaseUrl::ACCOUNTS->value . PyrusEndpoint::AUTH->path()
-                        && $request->payload === $normalizedCredentials
+                        && $request->payload === [
+                            'login' => $credentials->login,
+                            'security_key' => $credentials->securityKey,
+                            'person_id' => $credentials->personId,
+                        ]
                         && $request->headers === [
                             PyrusHeader::CONTENT_TYPE->value => 'application/json',
                         ]
                 )
             )
             ->willReturn(
-                new PyrusResponse(PyrusResponseStatus::OK, $authTokenJson)
+                $this->createPyrusResponse($response)
             );
 
-        $dataConverter = $this->mock(PyrusDataConverter::class);
-        $dataConverter->expects($this->once())
-            ->method('normalize')
-            ->with(
-                $this->identicalTo($credentials)
-            )
-            ->willReturn($normalizedCredentials);
-        $dataConverter->expects($this->once())
-            ->method('jsonDecode')
-            ->with(
-                $this->identicalTo($authTokenJson)
-            )
-            ->willReturn($authTokenArray);
-        $dataConverter->expects($this->once())
-            ->method('denormalize')
-            ->with(
-                $this->identicalTo($authTokenArray),
-                $this->identicalTo(PyrusAuthToken::class)
-            )
-            ->willReturn($authToken);
+        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
+        $authToken = $client->auth($credentials);
 
-        $client = new PyrusClientImpl(
-            $transport,
-            $dataConverter,
-            new PyrusClientOptions()
-        );
-        $res = $client->auth($credentials);
-
-        $this->assertSame($authToken, $res);
+        $this->assertSame($response['access_token'], $authToken->accessToken);
+        $this->assertSame($response['api_url'], $authToken->apiUrl);
+        $this->assertSame($response['files_url'], $authToken->filesUrl);
     }
 
     /**
@@ -101,16 +77,12 @@ final class PyrusClientImplTest extends BaseCase
         $payload = [
             'test' => 'payload',
         ];
-        $normalizedPayload = [
-            'test' => 'payload normalized',
-        ];
-        $responseString = 'qwe';
         $response = [
             'test' => 'response',
             'test_1' => 'response 1',
         ];
 
-        $authToken = new PyrusAuthToken('test', 'https://test.api/', 'test');
+        $authToken = $this->createAuthToken();
 
         $transport = $this->mock(PyrusTransport::class);
         $transport->expects($this->once())
@@ -119,7 +91,7 @@ final class PyrusClientImplTest extends BaseCase
                 $this->callback(
                     fn (PyrusRequest $request): bool => $request->method === $endpoint->method()
                         && $request->url === rtrim($authToken->apiUrl, '/') . $endpoint->path($urlParams)
-                        && $request->payload === $normalizedPayload
+                        && $request->payload === $payload
                         && $request->headers === [
                             PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
                             PyrusHeader::CONTENT_TYPE->value => 'application/json',
@@ -127,28 +99,10 @@ final class PyrusClientImplTest extends BaseCase
                 )
             )
             ->willReturn(
-                new PyrusResponse(PyrusResponseStatus::OK, $responseString)
+                $this->createPyrusResponse($response)
             );
 
-        $dataConverter = $this->mock(PyrusDataConverter::class);
-        $dataConverter->expects($this->once())
-            ->method('normalize')
-            ->with(
-                $this->identicalTo($payload)
-            )
-            ->willReturn($normalizedPayload);
-        $dataConverter->expects($this->once())
-            ->method('jsonDecode')
-            ->with(
-                $this->identicalTo($responseString)
-            )
-            ->willReturn($response);
-
-        $client = new PyrusClientImpl(
-            $transport,
-            $dataConverter,
-            new PyrusClientOptions()
-        );
+        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
         $client->useAuthToken($authToken);
         $res = $client->request($endpoint, $urlParams, $payload);
 
@@ -161,74 +115,40 @@ final class PyrusClientImplTest extends BaseCase
     public function testRequestWithTokenRefresh(): void
     {
         $endpoint = PyrusEndpoint::CATALOG_INDEX;
-
-        $tokenString = 'token string';
-        $token = [
-            'test' => 'response',
+        $tokenResponse = [
+            'access_token' => 'access_token_1',
+            'api_url' => 'api_url_1',
+            'files_url' => 'files_url_1',
         ];
-
-        $responseString = 'response string';
         $response = [
             'test' => 'response',
+            'test_1' => 'response 1',
         ];
-
-        $credentials = new PyrusCredentials('login', 'securityKey');
-        $authToken = new PyrusAuthToken('old token', 'https://test.api', 'test');
-        $refreshedAuthToken = new PyrusAuthToken('new token', 'https://test.api', 'test');
+        $credentials = $this->createCredentials();
+        $authToken = $this->createAuthToken();
 
         $transport = $this->mock(PyrusTransport::class);
         $transport->expects($this->exactly(3))
             ->method('request')
             ->willReturnCallback(
-                function (PyrusRequest $request) use ($endpoint, $authToken, $refreshedAuthToken, $tokenString, $responseString): PyrusResponse {
-                    if (
-                        str_ends_with($request->url, $endpoint->path())
-                        && isset($request->headers[PyrusHeader::AUTHORIZATION->value])
-                    ) {
-                        $authHeader = $request->headers[PyrusHeader::AUTHORIZATION->value];
+                function (PyrusRequest $request) use ($endpoint, $authToken, $response, $tokenResponse): PyrusResponse {
+                    if (str_ends_with($request->url, $endpoint->path())) {
+                        $authHeader = $request->headers[PyrusHeader::AUTHORIZATION->value] ?? null;
                         if ($authHeader === "Bearer {$authToken->accessToken}") {
-                            return new PyrusResponse(PyrusResponseStatus::UNAUTHORIZED, '');
-                        } elseif ($authHeader === "Bearer {$refreshedAuthToken->accessToken}") {
-                            return new PyrusResponse(PyrusResponseStatus::OK, $responseString);
+                            return $this->createPyrusResponse(status: PyrusResponseStatus::UNAUTHORIZED);
+                        } elseif ($authHeader === "Bearer {$tokenResponse['access_token']}") {
+                            return $this->createPyrusResponse($response);
                         }
                     }
                     if (str_ends_with($request->url, PyrusEndpoint::AUTH->path())) {
-                        return new PyrusResponse(PyrusResponseStatus::OK, $tokenString);
+                        return $this->createPyrusResponse($tokenResponse);
                     }
 
-                    return new PyrusResponse(PyrusResponseStatus::SERVER_ERROR, '');
+                    return $this->createPyrusResponse(status: PyrusResponseStatus::SERVER_ERROR);
                 }
             );
 
-        $dataConverter = $this->mock(PyrusDataConverter::class);
-        $dataConverter->expects($this->once())
-            ->method('normalize')
-            ->with(
-                $this->identicalTo($credentials)
-            )
-            ->willReturn([]);
-        $dataConverter->expects($this->once())
-            ->method('denormalize')
-            ->with(
-                $this->identicalTo($token),
-                $this->identicalTo(PyrusAuthToken::class)
-            )
-            ->willReturn($refreshedAuthToken);
-        $dataConverter->expects($this->exactly(3))
-            ->method('jsonDecode')
-            ->willReturnCallback(
-                fn (string $payload): array => match ($payload) {
-                    $tokenString => $token,
-                    $responseString => $response,
-                    default => [],
-                }
-            );
-
-        $client = new PyrusClientImpl(
-            $transport,
-            $dataConverter,
-            new PyrusClientOptions()
-        );
+        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
         $client->useAuthCredentials($credentials);
         $client->useAuthToken($authToken);
         $res = $client->request($endpoint);
@@ -243,8 +163,7 @@ final class PyrusClientImplTest extends BaseCase
     {
         $endpoint = PyrusEndpoint::CATALOG_INDEX;
         $exceptionMessage = 'test exception';
-
-        $authToken = new PyrusAuthToken('test', 'https://test.api', 'test');
+        $authToken = $this->createAuthToken();
 
         $transport = $this->mock(PyrusTransport::class);
         $transport->expects($this->once())
@@ -253,13 +172,7 @@ final class PyrusClientImplTest extends BaseCase
                 new \RuntimeException($exceptionMessage)
             );
 
-        $dataConverter = $this->mock(PyrusDataConverter::class);
-
-        $client = new PyrusClientImpl(
-            $transport,
-            $dataConverter,
-            new PyrusClientOptions()
-        );
+        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
         $client->useAuthToken($authToken);
 
         $this->expectException(PyrusTransportException::class);
@@ -273,34 +186,20 @@ final class PyrusClientImplTest extends BaseCase
     public function testRequestApiException(): void
     {
         $endpoint = PyrusEndpoint::CATALOG_INDEX;
-        $responseString = 'qwe';
         $response = [
             'error' => 'api error',
             'error_code' => 123,
         ];
-
-        $authToken = new PyrusAuthToken('test', 'https://test.api', 'test');
+        $authToken = $this->createAuthToken();
 
         $transport = $this->mock(PyrusTransport::class);
         $transport->expects($this->once())
             ->method('request')
             ->willReturn(
-                new PyrusResponse(PyrusResponseStatus::OK, $responseString)
+                $this->createPyrusResponse($response)
             );
 
-        $dataConverter = $this->mock(PyrusDataConverter::class);
-        $dataConverter->expects($this->once())
-            ->method('jsonDecode')
-            ->with(
-                $this->identicalTo($responseString)
-            )
-            ->willReturn($response);
-
-        $client = new PyrusClientImpl(
-            $transport,
-            $dataConverter,
-            new PyrusClientOptions()
-        );
+        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
         $client->useAuthToken($authToken);
 
         $this->expectException(PyrusApiException::class);
@@ -315,33 +214,19 @@ final class PyrusClientImplTest extends BaseCase
     public function testRequestApiExceptionNoErrorCode(): void
     {
         $endpoint = PyrusEndpoint::CATALOG_INDEX;
-        $responseString = 'qwe';
         $response = [
             'error' => 'api error',
         ];
-
-        $authToken = new PyrusAuthToken('test', 'https://test.api', 'test');
+        $authToken = $this->createAuthToken();
 
         $transport = $this->mock(PyrusTransport::class);
         $transport->expects($this->once())
             ->method('request')
             ->willReturn(
-                new PyrusResponse(PyrusResponseStatus::OK, $responseString)
+                $this->createPyrusResponse($response)
             );
 
-        $dataConverter = $this->mock(PyrusDataConverter::class);
-        $dataConverter->expects($this->once())
-            ->method('jsonDecode')
-            ->with(
-                $this->identicalTo($responseString)
-            )
-            ->willReturn($response);
-
-        $client = new PyrusClientImpl(
-            $transport,
-            $dataConverter,
-            new PyrusClientOptions()
-        );
+        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
         $client->useAuthToken($authToken);
 
         $this->expectException(PyrusApiException::class);
@@ -356,31 +241,16 @@ final class PyrusClientImplTest extends BaseCase
     public function testRequestBadResponseStatusException(): void
     {
         $endpoint = PyrusEndpoint::CATALOG_INDEX;
-        $responseString = 'qwe';
-        $response = [];
-
-        $authToken = new PyrusAuthToken('test', 'https://test.api', 'test');
+        $authToken = $this->createAuthToken();
 
         $transport = $this->mock(PyrusTransport::class);
         $transport->expects($this->once())
             ->method('request')
             ->willReturn(
-                new PyrusResponse(PyrusResponseStatus::SERVER_ERROR, $responseString)
+                $this->createPyrusResponse(status: PyrusResponseStatus::SERVER_ERROR)
             );
 
-        $dataConverter = $this->mock(PyrusDataConverter::class);
-        $dataConverter->expects($this->once())
-            ->method('jsonDecode')
-            ->with(
-                $this->identicalTo($responseString)
-            )
-            ->willReturn($response);
-
-        $client = new PyrusClientImpl(
-            $transport,
-            $dataConverter,
-            new PyrusClientOptions()
-        );
+        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
         $client->useAuthToken($authToken);
 
         $this->expectException(PyrusTransportException::class);
@@ -394,18 +264,47 @@ final class PyrusClientImplTest extends BaseCase
     public function testRequestNoCredentialsException(): void
     {
         $endpoint = PyrusEndpoint::CATALOG_INDEX;
-
         $transport = $this->mock(PyrusTransport::class);
-        $dataConverter = $this->mock(PyrusDataConverter::class);
 
-        $client = new PyrusClientImpl(
-            $transport,
-            $dataConverter,
-            new PyrusClientOptions()
-        );
+        $client = new PyrusClientImpl($transport, new PyrusClientOptions());
 
         $this->expectException(PyrusApiException::class);
         $this->expectExceptionMessage('Please provide credentials or authorization token');
         $client->request($endpoint);
+    }
+
+    /**
+     * Create credentials mock to use in tests.
+     */
+    private function createCredentials(): PyrusCredentials
+    {
+        return new PyrusCredentials(
+            'login',
+            'security_key',
+            'person_id'
+        );
+    }
+
+    /**
+     * Create auth token mock to use in tests.
+     */
+    private function createAuthToken(): PyrusAuthToken
+    {
+        return new PyrusAuthToken(
+            'acces_token',
+            'https://test.api/',
+            'https://test.files/'
+        );
+    }
+
+    /**
+     * Create pyrus response mock using provided content and status.
+     */
+    private function createPyrusResponse(array $payload = [], PyrusResponseStatus $status = PyrusResponseStatus::OK): PyrusResponse
+    {
+        return new PyrusResponse(
+            $status,
+            json_encode($payload)
+        );
     }
 }

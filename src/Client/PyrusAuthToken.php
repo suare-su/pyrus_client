@@ -10,11 +10,8 @@ namespace SuareSu\PyrusClient\Client;
 final class PyrusAuthToken
 {
     public function __construct(
-        /** @psalm-var non-empty-string */
         public readonly string $accessToken,
-        /** @psalm-var non-empty-string */
         public readonly string $apiUrl,
-        /** @psalm-var non-empty-string */
         public readonly string $filesUrl,
     ) {
     }
