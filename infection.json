@@ -12,6 +12,7 @@
         "@default": true,
         "CastString": false,
         "CastInt": false,
+        "CastArray": false,
         "MatchArmRemoval": {
             "ignore": [
                 "SuareSu\\PyrusClient\\Pyrus\\PyrusEndpoint::getInternalPath",
