@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SuareSu\PyrusClient\Transport;
 
+use SuareSu\PyrusClient\Client\PyrusClientOptions;
+
 /**
  * Facade for HTTP client. Converts data and throws errors.
  */
@@ -12,7 +14,7 @@ final class PyrusTransportCurl implements PyrusTransport
     /**
      * {@inheritdoc}
      */
-    public function request(PyrusRequest $request): PyrusResponse
+    public function request(PyrusRequest $request, ?PyrusClientOptions $options = null): PyrusResponse
     {
         $headers = [];
         foreach ($request->headers as $key => $value) {
