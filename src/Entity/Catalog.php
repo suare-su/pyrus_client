@@ -10,6 +10,7 @@ namespace SuareSu\PyrusClient\Entity;
 class Catalog
 {
     /**
+     * @param int[]           $supervisors
      * @param CatalogHeader[] $catalogHeaders
      * @param CatalogItem[]   $items
      */
