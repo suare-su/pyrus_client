@@ -26,9 +26,9 @@ interface PyrusGateway
     public function useAuthCredentials(PyrusCredentials $credentials): void;
 
     /**
-     * @return array<int, Catalog>
+     * @return iterable<Catalog>
      */
-    public function getCatalogs(): array;
+    public function getCatalogs(): iterable;
 
     public function getCatalog(int $id, bool $includeDeleted = false): Catalog;
 }

@@ -41,7 +41,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     /**
      * {@inheritdoc}
      */
-    public function getCatalogs(): array
+    public function getCatalogs(): iterable
     {
         $raw = $this->client->request(PyrusEndpoint::CATALOG_INDEX);
         $data = (array) ($raw['catalogs'] ?? []);
