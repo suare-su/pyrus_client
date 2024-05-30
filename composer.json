@@ -45,7 +45,8 @@
       "vendor/bin/infection --min-msi=100 --min-covered-msi=100 --threads=4"
     ],
     "generate_serializer": [
-      "php scripts/generate_serializer.php"
+      "php scripts/generate_serializer.php",
+      "vendor/bin/php-cs-fixer fix ./src/DataConverter --config=.php-cs-fixer.dist.php -v --allow-risky=yes"
     ]
   },
   "config": {

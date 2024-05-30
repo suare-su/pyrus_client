@@ -29,12 +29,15 @@ final class SerializerGenerator
 {
     private const SCALAR_TYPES = [
         Type::BUILTIN_TYPE_BOOL,
-        Type::BUILTIN_TYPE_FALSE,
         Type::BUILTIN_TYPE_FLOAT,
         Type::BUILTIN_TYPE_INT,
-        Type::BUILTIN_TYPE_NULL,
         Type::BUILTIN_TYPE_STRING,
-        Type::BUILTIN_TYPE_TRUE,
+    ];
+    private const SCALAR_TYPES_DEFAULTS = [
+        Type::BUILTIN_TYPE_BOOL => 'false',
+        Type::BUILTIN_TYPE_FLOAT => '.0',
+        Type::BUILTIN_TYPE_INT => '0',
+        Type::BUILTIN_TYPE_STRING => "''",
     ];
 
     private readonly PropertyInfoExtractorInterface $propertyInfoExtractor;
@@ -91,12 +94,21 @@ final class SerializerGenerator
 
         $class = $ns->addClass($className)
             ->setFinal()
-            // ->addImplement(DenormalizerInterface::class)
+            ->addImplement(DenormalizerInterface::class)
             ->addImplement(NormalizerInterface::class);
 
         $this->addSupportsNormalization($class, $descriptions);
-        $this->addGetSupportedTypes($class, $descriptions);
         $this->addNormalize($class, $descriptions);
+        $this->addSupportsDenormalization($class, $descriptions);
+        $this->addDenormalize($class, $descriptions);
+        $this->addGetSupportedTypes($class, $descriptions);
+
+        foreach ($descriptions as $description) {
+            $this->addEntityNormalize($class, $description, $descriptions);
+        }
+        foreach ($descriptions as $description) {
+            $this->addEntityDenormalize($class, $description, $descriptions);
+        }
 
         return $phpFile;
     }
@@ -120,28 +132,9 @@ final class SerializerGenerator
             ->addComment("{@inheritDoc}\n")
             ->setVisibility('public')
             ->setBody($body);
-        $method->addParameter('data');
+        $method->addParameter('data')->setType('mixed');
         $method->addParameter('format', new Literal('null'))->setNullable()->setType('string');
         $method->addParameter('context', new Literal('[]'))->setType('array');
-    }
-
-    /**
-     * @param ClassDescription[] $descriptions
-     */
-    private function addGetSupportedTypes(ClassType $class, array $descriptions): void
-    {
-        $body = '';
-        foreach ($descriptions as $description) {
-            $body .= "\n    {$description->shortClassName}::class => true,";
-        }
-        $body = "return [{$body}\n];";
-
-        $method = $class->addMethod('getSupportedTypes')
-            ->setReturnType('array')
-            ->addComment("{@inheritDoc}\n")
-            ->setVisibility('public')
-            ->setBody($body);
-        $method->addParameter('format')->setNullable()->setType('string');
     }
 
     /**
@@ -168,10 +161,6 @@ final class SerializerGenerator
         $method->addParameter('object')->setType('mixed');
         $method->addParameter('format', new Literal('null'))->setNullable()->setType('string');
         $method->addParameter('context', new Literal('[]'))->setType('array');
-
-        foreach ($descriptions as $description) {
-            $this->addEntityNormalize($class, $description, $descriptions);
-        }
     }
 
     /**
@@ -210,6 +199,121 @@ final class SerializerGenerator
             ->setVisibility('private')
             ->setBody($body);
         $method->addParameter('object')->setType($description->className);
+    }
+
+    /**
+     * @param ClassDescription[] $descriptions
+     */
+    private function addSupportsDenormalization(ClassType $class, array $descriptions): void
+    {
+        $body = '';
+        foreach ($descriptions as $description) {
+            if ('' !== $body) {
+                $body .= "\n    || ";
+            }
+            $body .= "\$type === {$description->shortClassName}::class";
+        }
+        $body = "\nreturn {$body};";
+
+        $method = $class->addMethod('supportsDenormalization')
+            ->setReturnType('bool')
+            ->addComment("{@inheritDoc}\n")
+            ->setVisibility('public')
+            ->setBody($body);
+        $method->addParameter('data')->setType('mixed');
+        $method->addParameter('type')->setType('string');
+        $method->addParameter('format', new Literal('null'))->setNullable()->setType('string');
+        $method->addParameter('context', new Literal('[]'))->setType('array');
+    }
+
+    /**
+     * @param array<string, ClassDescription> $descriptions
+     */
+    private function addDenormalize(ClassType $class, array $descriptions): void
+    {
+        $conditions = '';
+        foreach ($descriptions as $description) {
+            if ('' !== $conditions) {
+                $conditions .= ' else';
+            }
+            $conditions .= "if (\$type === {$description->shortClassName}::class) {\n";
+            $conditions .= "    return \$this->denormalize{$description->shortClassName}(\$data);\n";
+            $conditions .= '}';
+        }
+        $body = "if (!is_array(\$data)) {\n";
+        $body .= "    throw new InvalidArgumentException(\"Can't denormalize provided data\");\n";
+        $body .= "}\n\n";
+        $body .= "{$conditions}\n\n";
+        $body .= "throw new InvalidArgumentException(\"Can't denormalize provided type\");";
+
+        $method = $class->addMethod('denormalize')
+            ->setReturnType('mixed')
+            ->addComment("{@inheritDoc}\n")
+            ->setVisibility('public')
+            ->setBody($body);
+        $method->addParameter('data')->setType('mixed');
+        $method->addParameter('type')->setType('string');
+        $method->addParameter('format', new Literal('null'))->setNullable()->setType('string');
+        $method->addParameter('context', new Literal('[]'))->setType('array');
+    }
+
+    /**
+     * @param array<string, ClassDescription> $descriptions
+     */
+    private function addEntityDenormalize(ClassType $class, ClassDescription $description, array $descriptions): void
+    {
+        $body = '';
+        foreach ($description->properties as $property => $definition) {
+            if (!isset($definition[0])) {
+                continue;
+            }
+            $type = $definition[0];
+            $propertyKey = $this->camelCaseToSnakeCase($property);
+            $builtInType = $type->getBuiltinType();
+            if (\in_array($builtInType, self::SCALAR_TYPES)) {
+                $default = self::SCALAR_TYPES_DEFAULTS[$builtInType];
+                $body .= "    ($builtInType) (\$data['{$propertyKey}'] ?? {$default}),\n";
+            } elseif ($type->isCollection()) {
+                $valueType = $type->getCollectionValueTypes()[0] ?? null;
+                $builtInValueType = $valueType?->getBuiltinType();
+                $valueDescription = $descriptions[(string) $valueType?->getClassName()] ?? null;
+                if (\in_array($builtInValueType, self::SCALAR_TYPES)) {
+                    $body .= '    array_map(';
+                    $body .= "fn (mixed \$val): {$builtInValueType} => ({$builtInValueType}) \$val,";
+                    $body .= " (array) (\$data['{$propertyKey}'] ?? [])),\n";
+                } elseif ($valueDescription) {
+                    $body .= '    array_map(';
+                    $body .= "fn (array \$val): {$valueDescription->shortClassName} => \$this->denormalize{$valueDescription->shortClassName}(\$val),";
+                    $body .= " (array) (\$data['{$propertyKey}'] ?? [])),\n";
+                }
+            }
+        }
+        $body = "return new {$description->shortClassName}(\n{$body});";
+
+        $method = $class->addMethod("denormalize{$description->shortClassName}")
+            ->setReturnType($description->className)
+            ->setVisibility('private')
+            ->setBody($body);
+        $method->addParameter('data')->setType('array');
+    }
+
+    /**
+     * @param ClassDescription[] $descriptions
+     */
+    private function addGetSupportedTypes(ClassType $class, array $descriptions): void
+    {
+        $body = '';
+        foreach ($descriptions as $description) {
+            $body .= "\n    {$description->shortClassName}::class => true,";
+        }
+        $body = "return [{$body}\n];";
+
+        $method = $class->addMethod('getSupportedTypes')
+            ->setReturnType('array')
+            ->addComment("{@inheritDoc}\n")
+            ->setVisibility('public')
+            ->setBody($body);
+        $method->addParameter('format')->setNullable()->setType('string');
     }
 
     /**
