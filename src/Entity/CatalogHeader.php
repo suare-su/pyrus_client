@@ -10,8 +10,8 @@ namespace SuareSu\PyrusClient\Entity;
 class CatalogHeader
 {
     public function __construct(
-        public readonly string $name,
-        public readonly string $type,
+        public string $name,
+        public string $type,
     ) {
     }
 }
