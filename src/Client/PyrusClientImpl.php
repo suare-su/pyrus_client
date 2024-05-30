@@ -81,7 +81,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
-    public function request(PyrusEndpoint $endpoint, array $urlParams = [], ?array $payload = null): array
+    public function request(PyrusEndpoint $endpoint, array|float|int|string $urlParams = [], ?array $payload = null): array
     {
         $authToken = $this->getOrRequestAuthorizationToken()->accessToken;
         $method = $endpoint->method();
@@ -172,18 +172,20 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * Create an absolute URL for provided Pyrus endpoint.
      *
-     * @param array<float|int|string> $urlParams
+     * @param array<float|int|string>|float|int|string $urlParams
      *
      * @psalm-return non-empty-string
      */
-    private function createEndpointUrl(PyrusEndpoint $endpoint, array $urlParams = [], ?string $forceBaseUrl = null): string
+    private function createEndpointUrl(PyrusEndpoint $endpoint, array|float|int|string $urlParams = [], ?string $forceBaseUrl = null): string
     {
         $baseUrl = (string) $this->token?->apiUrl;
         if (null !== $forceBaseUrl) {
             $baseUrl = $forceBaseUrl;
         }
 
-        $path = $endpoint->path($urlParams);
+        $path = $endpoint->path(
+            \is_array($urlParams) ? $urlParams : [$urlParams]
+        );
 
         return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
     }

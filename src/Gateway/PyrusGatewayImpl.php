@@ -58,9 +58,15 @@ final class PyrusGatewayImpl implements PyrusGateway
      */
     public function getCatalog(int $id, bool $includeDeleted = false): Catalog
     {
-        $urlParams = [$id];
-        $payload = ['include_deleted' => $includeDeleted];
-        $raw = $this->client->request(PyrusEndpoint::CATALOG_READ, $urlParams, $payload);
+        $raw = $this->client->request(
+            PyrusEndpoint::CATALOG_READ,
+            [
+                $id,
+            ],
+            [
+                'include_deleted' => $includeDeleted,
+            ]
+        );
 
         /** @var Catalog */
         $catalog = $this->dataConverter->denormalize($raw, Catalog::class);
