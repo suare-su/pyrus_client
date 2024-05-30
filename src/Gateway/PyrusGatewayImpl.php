@@ -60,9 +60,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     {
         $raw = $this->client->request(
             PyrusEndpoint::CATALOG_READ,
-            [
-                $id,
-            ],
+            $id,
             [
                 'include_deleted' => $includeDeleted,
             ]

@@ -105,8 +105,10 @@ final class PyrusGatewayImplTest extends BaseCase
         $client = $this->createClientAwaitsRequest(
             PyrusEndpoint::CATALOG_READ,
             $result,
-            [$id],
-            ['include_deleted' => false]
+            $id,
+            [
+                'include_deleted' => false,
+            ]
         );
         $dataConverter = $this->createDataConverterAwaitsDenormalize(
             $result,
@@ -123,7 +125,7 @@ final class PyrusGatewayImplTest extends BaseCase
     /**
      * Create Pyrus client mock that expects provided request data.
      */
-    private function createClientAwaitsRequest(PyrusEndpoint $endpoint, array $result, array $urlParams = [], ?array $payload = null): PyrusClient
+    private function createClientAwaitsRequest(PyrusEndpoint $endpoint, array $result, array|int|float|string $urlParams = [], ?array $payload = null): PyrusClient
     {
         $client = $this->mock(PyrusClient::class);
 
