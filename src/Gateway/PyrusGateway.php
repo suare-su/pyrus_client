@@ -7,6 +7,7 @@ namespace SuareSu\PyrusClient\Gateway;
 use SuareSu\PyrusClient\Client\PyrusAuthToken;
 use SuareSu\PyrusClient\Client\PyrusCredentials;
 use SuareSu\PyrusClient\Entity\Catalog;
+use SuareSu\PyrusClient\Entity\CatalogCreate;
 
 /**
  * Object that implements all concrete requests for Pyrus.
@@ -31,4 +32,6 @@ interface PyrusGateway
     public function getCatalogs(): iterable;
 
     public function getCatalog(int $id, bool $includeDeleted = false): Catalog;
+
+    public function createCatalog(CatalogCreate $catalog): Catalog;
 }

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace SuareSu\PyrusClient\DataConverter;
 
 use SuareSu\PyrusClient\Entity\Catalog;
+use SuareSu\PyrusClient\Entity\CatalogCreate;
 use SuareSu\PyrusClient\Entity\CatalogHeader;
 use SuareSu\PyrusClient\Entity\CatalogItem;
+use SuareSu\PyrusClient\Entity\CatalogItemCreate;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -19,8 +21,10 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
         return $data instanceof CatalogItem
+            || $data instanceof CatalogCreate
             || $data instanceof Catalog
-            || $data instanceof CatalogHeader;
+            || $data instanceof CatalogHeader
+            || $data instanceof CatalogItemCreate;
     }
 
     /**
@@ -30,10 +34,14 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
     {
         if ($object instanceof CatalogItem) {
             return $this->normalizeCatalogItem($object);
+        } elseif ($object instanceof CatalogCreate) {
+            return $this->normalizeCatalogCreate($object);
         } elseif ($object instanceof Catalog) {
             return $this->normalizeCatalog($object);
         } elseif ($object instanceof CatalogHeader) {
             return $this->normalizeCatalogHeader($object);
+        } elseif ($object instanceof CatalogItemCreate) {
+            return $this->normalizeCatalogItemCreate($object);
         }
 
         throw new InvalidArgumentException("Can't normalize provided data");
@@ -49,8 +57,10 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         array $context = [],
     ): bool {
         return CatalogItem::class === $type
+            || CatalogCreate::class === $type
             || Catalog::class === $type
-            || CatalogHeader::class === $type;
+            || CatalogHeader::class === $type
+            || CatalogItemCreate::class === $type;
     }
 
     /**
@@ -64,10 +74,14 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
 
         if (CatalogItem::class === $type) {
             return $this->denormalizeCatalogItem($data);
+        } elseif (CatalogCreate::class === $type) {
+            return $this->denormalizeCatalogCreate($data);
         } elseif (Catalog::class === $type) {
             return $this->denormalizeCatalog($data);
         } elseif (CatalogHeader::class === $type) {
             return $this->denormalizeCatalogHeader($data);
+        } elseif (CatalogItemCreate::class === $type) {
+            return $this->denormalizeCatalogItemCreate($data);
         }
 
         throw new InvalidArgumentException("Can't denormalize provided type");
@@ -80,8 +94,10 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
     {
         return [
             CatalogItem::class => true,
+            CatalogCreate::class => true,
             Catalog::class => true,
             CatalogHeader::class => true,
+            CatalogItemCreate::class => true,
         ];
     }
 
@@ -90,6 +106,15 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         return [
             'item_id' => $object->itemId,
             'values' => $object->values,
+        ];
+    }
+
+    private function normalizeCatalogCreate(CatalogCreate $object): array
+    {
+        return [
+            'name' => $object->name,
+            'catalog_headers' => $object->catalogHeaders,
+            'items' => array_map(fn (CatalogItemCreate $val): array => $this->normalizeCatalogItemCreate($val), $object->items),
         ];
     }
 
@@ -115,11 +140,27 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         ];
     }
 
+    private function normalizeCatalogItemCreate(CatalogItemCreate $object): array
+    {
+        return [
+            'values' => $object->values,
+        ];
+    }
+
     private function denormalizeCatalogItem(array $data): CatalogItem
     {
         return new CatalogItem(
             (int) ($data['item_id'] ?? 0),
             array_map(fn (mixed $val): string => (string) $val, (array) ($data['values'] ?? [])),
+        );
+    }
+
+    private function denormalizeCatalogCreate(array $data): CatalogCreate
+    {
+        return new CatalogCreate(
+            (string) ($data['name'] ?? ''),
+            array_map(fn (mixed $val): string => (string) $val, (array) ($data['catalog_headers'] ?? [])),
+            array_map(fn (array $val): CatalogItemCreate => $this->denormalizeCatalogItemCreate($val), (array) ($data['items'] ?? [])),
         );
     }
 
@@ -142,6 +183,13 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         return new CatalogHeader(
             (string) ($data['name'] ?? ''),
             (string) ($data['type'] ?? ''),
+        );
+    }
+
+    private function denormalizeCatalogItemCreate(array $data): CatalogItemCreate
+    {
+        return new CatalogItemCreate(
+            array_map(fn (mixed $val): string => (string) $val, (array) ($data['values'] ?? [])),
         );
     }
 }

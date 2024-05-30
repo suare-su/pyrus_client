@@ -37,7 +37,7 @@ generate: ## Generate all utogenerated classes
 	$(composer_bin) generate_serializer
 
 release: ## Run all preparations before release
-	$(composer_bin) generate
+	$(composer_bin) generate_serializer
 	$(composer_bin) fixer
 	$(composer_bin) linter
 	$(composer_bin) test
