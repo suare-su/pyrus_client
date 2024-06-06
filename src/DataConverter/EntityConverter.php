@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace SuareSu\PyrusClient\DataConverter;
 
-use SuareSu\PyrusClient\Entity\Catalog;
-use SuareSu\PyrusClient\Entity\CatalogCreate;
-use SuareSu\PyrusClient\Entity\CatalogHeader;
-use SuareSu\PyrusClient\Entity\CatalogItem;
-use SuareSu\PyrusClient\Entity\CatalogItemCreate;
+use SuareSu\PyrusClient\Entity\Catalog\Catalog;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogHeader;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogItem;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogItemCreate;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
