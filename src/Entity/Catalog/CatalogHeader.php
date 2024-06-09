@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SuareSu\PyrusClient\Entity;
+namespace SuareSu\PyrusClient\Entity\Catalog;
 
 /**
  * DTO for catalog header entity from Pyrus.
@@ -10,8 +10,8 @@ namespace SuareSu\PyrusClient\Entity;
 class CatalogHeader
 {
     public function __construct(
-        public readonly string $name,
-        public readonly string $type,
+        public string $name,
+        public string $type,
     ) {
     }
 }

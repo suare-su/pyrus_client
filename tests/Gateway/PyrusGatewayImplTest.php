@@ -8,7 +8,10 @@ use SuareSu\PyrusClient\Client\PyrusAuthToken;
 use SuareSu\PyrusClient\Client\PyrusClient;
 use SuareSu\PyrusClient\Client\PyrusCredentials;
 use SuareSu\PyrusClient\DataConverter\PyrusDataConverter;
-use SuareSu\PyrusClient\Entity\Catalog;
+use SuareSu\PyrusClient\Entity\Catalog\Catalog;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
 use SuareSu\PyrusClient\Gateway\PyrusGatewayImpl;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 use SuareSu\PyrusClient\Tests\BaseCase;
@@ -105,8 +108,10 @@ final class PyrusGatewayImplTest extends BaseCase
         $client = $this->createClientAwaitsRequest(
             PyrusEndpoint::CATALOG_READ,
             $result,
-            [$id],
-            ['include_deleted' => false]
+            $id,
+            [
+                'include_deleted' => false,
+            ]
         );
         $dataConverter = $this->createDataConverterAwaitsDenormalize(
             $result,
@@ -121,9 +126,99 @@ final class PyrusGatewayImplTest extends BaseCase
     }
 
     /**
+     * @test
+     */
+    public function testCreateCatalog(): void
+    {
+        $catalogCreate = $this->mock(CatalogCreate::class);
+        $catalogCreateDenormalized = [
+            'catalog_create_denormalized' => 'value',
+            'catalog_create_denormalized_1' => 'value 1',
+        ];
+        $result = [
+            'result' => 'value',
+            'result_1' => 'value 1',
+        ];
+        $normalizedResult = $this->mock(Catalog::class);
+
+        $client = $this->createClientAwaitsRequest(
+            endpoint: PyrusEndpoint::CATALOG_CREATE,
+            result: $result,
+            payload: $catalogCreateDenormalized
+        );
+        $dataConverter = $this->createDataConverter(
+            [
+                [
+                    $catalogCreate,
+                    $catalogCreateDenormalized,
+                ],
+            ],
+            [
+                [
+                    $result,
+                    Catalog::class,
+                    $normalizedResult,
+                ],
+            ]
+        );
+
+        $gateway = new PyrusGatewayImpl($client, $dataConverter);
+        $res = $gateway->createCatalog($catalogCreate);
+
+        $this->assertSame($normalizedResult, $res);
+    }
+
+    /**
+     * @test
+     */
+    public function testUpdateCatalog(): void
+    {
+        $id = 123;
+        $catalogUpdate = $this->mock(CatalogUpdate::class);
+        $catalogUpdateDenormalized = [
+            'catalog_create_denormalized' => 'value',
+            'catalog_create_denormalized_1' => 'value 1',
+        ];
+        $result = [
+            'result' => 'value',
+            'result_1' => 'value 1',
+        ];
+        $normalizedResult = $this->mock(CatalogUpdateResponse::class);
+
+        $client = $this->createClientAwaitsRequest(
+            PyrusEndpoint::CATALOG_UPDATE,
+            $result,
+            [
+                $id,
+            ],
+            $catalogUpdateDenormalized
+        );
+        $dataConverter = $this->createDataConverter(
+            [
+                [
+                    $catalogUpdate,
+                    $catalogUpdateDenormalized,
+                ],
+            ],
+            [
+                [
+                    $result,
+                    CatalogUpdateResponse::class,
+                    $normalizedResult,
+                ],
+            ]
+        );
+
+        $gateway = new PyrusGatewayImpl($client, $dataConverter);
+        $res = $gateway->updateCatalog($id, $catalogUpdate);
+
+        $this->assertSame($normalizedResult, $res);
+    }
+
+    /**
      * Create Pyrus client mock that expects provided request data.
      */
-    private function createClientAwaitsRequest(PyrusEndpoint $endpoint, array $result, array $urlParams = [], ?array $payload = null): PyrusClient
+    private function createClientAwaitsRequest(PyrusEndpoint $endpoint, array $result, array|int|float|string $urlParams = [], ?array $payload = null): PyrusClient
     {
         $client = $this->mock(PyrusClient::class);
 
@@ -144,15 +239,62 @@ final class PyrusGatewayImplTest extends BaseCase
      */
     private function createDataConverterAwaitsDenormalize(array $from, string $type, mixed $to): PyrusDataConverter
     {
+        return $this->createDataConverter(denormalize: [
+            [
+                $from,
+                $type,
+                $to,
+            ],
+        ]);
+    }
+
+    /**
+     * Create Pyrus data converter mock.
+     *
+     * @psalm-suppress MixedInferredReturnType
+     * @psalm-suppress MixedReturnStatement
+     */
+    private function createDataConverter(array $normalize = [], array $denormalize = []): PyrusDataConverter
+    {
         $dataConverter = $this->mock(PyrusDataConverter::class);
 
-        $dataConverter->expects($this->once())
-            ->method('denormalize')
-            ->with(
-                $this->identicalTo($from),
-                $this->identicalTo($type),
-            )
-            ->willReturn($to);
+        $normalizeCount = \count($normalize);
+        if ($normalizeCount > 0) {
+            $dataConverter->expects($this->exactly($normalizeCount))
+                ->method('normalize')
+                ->willReturnCallback(
+                    function (array|object $data) use ($normalize): array {
+                        foreach ($normalize as $item) {
+                            if (isset($item[0], $item[1]) && $data === $item[0]) {
+                                return $item[1];
+                            }
+                        }
+
+                        return [];
+                    }
+                );
+        } else {
+            $dataConverter->expects($this->never())->method('normalize');
+        }
+
+        $denormalizeCount = \count($denormalize);
+        if ($denormalizeCount > 0) {
+            $dataConverter->expects($this->exactly($denormalizeCount))
+                ->method('denormalize')
+                ->willReturnCallback(
+                    function (mixed $data, string $type) use ($denormalize): object|array {
+                        foreach ($denormalize as $item) {
+                            if (isset($item[0], $item[1], $item[2]) && $data === $item[0] && $item[1] === $type) {
+                                return $item[2];
+                            }
+                        }
+
+                        return [];
+                    }
+                );
+        } else {
+            $dataConverter->expects($this->never())->method('denormalize');
+        }
 
         return $dataConverter;
     }

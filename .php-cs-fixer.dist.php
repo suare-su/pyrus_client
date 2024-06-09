@@ -45,4 +45,6 @@ $rules = [
 
 $config = new PhpCsFixer\Config();
 
-return $config->setRules($rules)->setFinder($finder);
+return $config->setParallelConfig(PhpCsFixer\Runner\Parallel\ParallelConfigFactory::detect())
+    ->setRules($rules)
+    ->setFinder($finder);

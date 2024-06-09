@@ -8,7 +8,10 @@ use SuareSu\PyrusClient\Client\PyrusAuthToken;
 use SuareSu\PyrusClient\Client\PyrusClient;
 use SuareSu\PyrusClient\Client\PyrusCredentials;
 use SuareSu\PyrusClient\DataConverter\PyrusDataConverter;
-use SuareSu\PyrusClient\Entity\Catalog;
+use SuareSu\PyrusClient\Entity\Catalog\Catalog;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 
 /**
@@ -41,7 +44,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     /**
      * {@inheritdoc}
      */
-    public function getCatalogs(): array
+    public function getCatalogs(): iterable
     {
         $raw = $this->client->request(PyrusEndpoint::CATALOG_INDEX);
         $data = (array) ($raw['catalogs'] ?? []);
@@ -58,13 +61,53 @@ final class PyrusGatewayImpl implements PyrusGateway
      */
     public function getCatalog(int $id, bool $includeDeleted = false): Catalog
     {
-        $urlParams = [$id];
-        $payload = ['include_deleted' => $includeDeleted];
-        $raw = $this->client->request(PyrusEndpoint::CATALOG_READ, $urlParams, $payload);
+        $raw = $this->client->request(
+            PyrusEndpoint::CATALOG_READ,
+            $id,
+            [
+                'include_deleted' => $includeDeleted,
+            ]
+        );
 
         /** @var Catalog */
         $catalog = $this->dataConverter->denormalize($raw, Catalog::class);
 
         return $catalog;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createCatalog(CatalogCreate $catalog): Catalog
+    {
+        $raw = $this->client->request(
+            PyrusEndpoint::CATALOG_CREATE,
+            [],
+            $this->dataConverter->normalize($catalog)
+        );
+
+        /** @var Catalog */
+        $createdCatalog = $this->dataConverter->denormalize($raw, Catalog::class);
+
+        return $createdCatalog;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function updateCatalog(int $id, CatalogUpdate $catalog): CatalogUpdateResponse
+    {
+        $raw = $this->client->request(
+            PyrusEndpoint::CATALOG_UPDATE,
+            [
+                $id,
+            ],
+            $this->dataConverter->normalize($catalog)
+        );
+
+        /** @var CatalogUpdateResponse */
+        $updatedCatalog = $this->dataConverter->denormalize($raw, CatalogUpdateResponse::class);
+
+        return $updatedCatalog;
     }
 }
