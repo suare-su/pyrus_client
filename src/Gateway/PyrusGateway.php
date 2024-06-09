@@ -10,6 +10,7 @@ use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
+use SuareSu\PyrusClient\Entity\Form\FormList;
 
 /**
  * Object that implements all concrete requests for Pyrus.
@@ -38,4 +39,9 @@ interface PyrusGateway
     public function createCatalog(CatalogCreate $catalog): Catalog;
 
     public function updateCatalog(int $id, CatalogUpdate $catalog): CatalogUpdateResponse;
+
+    /**
+     * @return iterable<FormList>
+     */
+    public function getForms(): iterable;
 }

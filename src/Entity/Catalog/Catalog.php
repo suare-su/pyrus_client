@@ -15,14 +15,14 @@ class Catalog
      * @param CatalogItem[]   $items
      */
     public function __construct(
-        public int $catalogId,
-        public string $name,
-        public string $sourceType,
-        public int $version,
-        public bool $deleted,
-        public array $supervisors = [],
-        public array $catalogHeaders = [],
-        public array $items = [],
+        public readonly int $catalogId,
+        public readonly string $name,
+        public readonly string $sourceType,
+        public readonly int $version,
+        public readonly bool $deleted,
+        public readonly array $supervisors = [],
+        public readonly array $catalogHeaders = [],
+        public readonly array $items = [],
     ) {
     }
 }
