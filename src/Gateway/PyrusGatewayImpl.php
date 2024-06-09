@@ -82,9 +82,8 @@ final class PyrusGatewayImpl implements PyrusGateway
     public function createCatalog(CatalogCreate $catalog): Catalog
     {
         $raw = $this->client->request(
-            PyrusEndpoint::CATALOG_CREATE,
-            [],
-            $this->dataConverter->normalize($catalog)
+            endpoint: PyrusEndpoint::CATALOG_CREATE,
+            payload: $this->dataConverter->normalize($catalog)
         );
 
         /** @var Catalog */
@@ -100,9 +99,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     {
         $raw = $this->client->request(
             PyrusEndpoint::CATALOG_UPDATE,
-            [
-                $id,
-            ],
+            $id,
             $this->dataConverter->normalize($catalog)
         );
 

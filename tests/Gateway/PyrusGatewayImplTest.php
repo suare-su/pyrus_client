@@ -173,9 +173,7 @@ final class PyrusGatewayImplTest extends BaseCase
         $client = $this->createClientAwaitsRequest(
             PyrusEndpoint::CATALOG_UPDATE,
             self::RESULT,
-            [
-                self::ID,
-            ],
+            self::ID,
             self::DENORMALIZED_INPUT
         );
         $dataConverter = $this->createDataConverter(
