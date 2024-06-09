@@ -8,11 +8,12 @@ namespace SuareSu\PyrusClient\Scripts\Helper;
  * Helper that can get and return information about php file content.
  *
  * @internal
- *
- * @psalm-api
  */
 final class PhpFileHelper
 {
+    /**
+     * @psalm-suppress UnusedConstructor
+     */
     private function __construct()
     {
     }

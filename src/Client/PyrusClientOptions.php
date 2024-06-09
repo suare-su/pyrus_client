@@ -8,6 +8,8 @@ use SuareSu\PyrusClient\Pyrus\PyrusBaseUrl;
 
 /**
  * Object that stores and provides configuration for Pyrus client.
+ *
+ * @psalm-api
  */
 final class PyrusClientOptions
 {
