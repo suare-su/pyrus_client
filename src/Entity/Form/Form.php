@@ -7,11 +7,12 @@ namespace SuareSu\PyrusClient\Entity\Form;
 /**
  * DTO for form entity from Pyrus.
  */
-class FormList
+class Form
 {
     /**
      * @param string[]    $steps
      * @param FormField[] $fields
+     * @param PrintForm[] $printForms
      */
     public function __construct(
         public readonly int $id,
@@ -19,6 +20,7 @@ class FormList
         public readonly bool $deletedOrClosed,
         public readonly array $steps = [],
         public readonly array $fields = [],
+        public readonly array $printForms = [],
     ) {
     }
 }

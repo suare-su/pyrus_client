@@ -12,7 +12,7 @@ use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
-use SuareSu\PyrusClient\Entity\Form\FormList;
+use SuareSu\PyrusClient\Entity\Form\Form;
 use SuareSu\PyrusClient\Gateway\PyrusGatewayImpl;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 use SuareSu\PyrusClient\Tests\BaseCase;
@@ -206,8 +206,8 @@ final class PyrusGatewayImplTest extends BaseCase
     public function testGetForms(): void
     {
         $normalizedResult = [
-            $this->mock(FormList::class),
-            $this->mock(FormList::class),
+            $this->mock(Form::class),
+            $this->mock(Form::class),
         ];
 
         $client = $this->createClientAwaitsRequest(
@@ -218,12 +218,36 @@ final class PyrusGatewayImplTest extends BaseCase
         );
         $dataConverter = $this->createDataConverterAwaitsDenormalize(
             self::RESULT,
-            FormList::class . '[]',
+            Form::class . '[]',
             $normalizedResult
         );
 
         $gateway = new PyrusGatewayImpl($client, $dataConverter);
         $res = $gateway->getForms();
+
+        $this->assertSame($normalizedResult, $res);
+    }
+
+    /**
+     * @test
+     */
+    public function testGetForm(): void
+    {
+        $normalizedResult = $this->mock(Form::class);
+
+        $client = $this->createClientAwaitsRequest(
+            PyrusEndpoint::FORM_READ,
+            self::RESULT,
+            self::ID
+        );
+        $dataConverter = $this->createDataConverterAwaitsDenormalize(
+            self::RESULT,
+            Form::class,
+            $normalizedResult
+        );
+
+        $gateway = new PyrusGatewayImpl($client, $dataConverter);
+        $res = $gateway->getForm(self::ID);
 
         $this->assertSame($normalizedResult, $res);
     }

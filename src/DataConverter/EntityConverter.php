@@ -11,8 +11,9 @@ use SuareSu\PyrusClient\Entity\Catalog\CatalogItem;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogItemCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
+use SuareSu\PyrusClient\Entity\Form\Form;
 use SuareSu\PyrusClient\Entity\Form\FormField;
-use SuareSu\PyrusClient\Entity\Form\FormList;
+use SuareSu\PyrusClient\Entity\Form\PrintForm;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -24,7 +25,8 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
      */
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
-        return $data instanceof FormList
+        return $data instanceof PrintForm
+            || $data instanceof Form
             || $data instanceof FormField
             || $data instanceof CatalogUpdate
             || $data instanceof CatalogItem
@@ -40,8 +42,10 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
      */
     public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
-        if ($object instanceof FormList) {
-            return $this->normalizeFormList($object);
+        if ($object instanceof PrintForm) {
+            return $this->normalizePrintForm($object);
+        } elseif ($object instanceof Form) {
+            return $this->normalizeForm($object);
         } elseif ($object instanceof FormField) {
             return $this->normalizeFormField($object);
         } elseif ($object instanceof CatalogUpdate) {
@@ -72,7 +76,8 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         ?string $format = null,
         array $context = [],
     ): bool {
-        return FormList::class === $type
+        return PrintForm::class === $type
+            || Form::class === $type
             || FormField::class === $type
             || CatalogUpdate::class === $type
             || CatalogItem::class === $type
@@ -92,8 +97,10 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
             throw new InvalidArgumentException("Can't denormalize provided data");
         }
 
-        if (FormList::class === $type) {
-            return $this->denormalizeFormList($data);
+        if (PrintForm::class === $type) {
+            return $this->denormalizePrintForm($data);
+        } elseif (Form::class === $type) {
+            return $this->denormalizeForm($data);
         } elseif (FormField::class === $type) {
             return $this->denormalizeFormField($data);
         } elseif (CatalogUpdate::class === $type) {
@@ -121,7 +128,8 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
     public function getSupportedTypes(?string $format): array
     {
         return [
-            FormList::class => true,
+            PrintForm::class => true,
+            Form::class => true,
             FormField::class => true,
             CatalogUpdate::class => true,
             CatalogItem::class => true,
@@ -133,7 +141,15 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         ];
     }
 
-    private function normalizeFormList(FormList $object): array
+    private function normalizePrintForm(PrintForm $object): array
+    {
+        return [
+            'print_form_id' => $object->printFormId,
+            'print_form_name' => $object->printFormName,
+        ];
+    }
+
+    private function normalizeForm(Form $object): array
     {
         return [
             'id' => $object->id,
@@ -141,6 +157,7 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
             'deleted_or_closed' => $object->deletedOrClosed,
             'steps' => $object->steps,
             'fields' => array_map(fn (FormField $val): array => $this->normalizeFormField($val), $object->fields),
+            'print_forms' => array_map(fn (PrintForm $val): array => $this->normalizePrintForm($val), $object->printForms),
         ];
     }
 
@@ -223,14 +240,26 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
     /**
      * @psalm-suppress MixedArgumentTypeCoercion
      */
-    private function denormalizeFormList(array $data): FormList
+    private function denormalizePrintForm(array $data): PrintForm
     {
-        return new FormList(
+        return new PrintForm(
+            (int) ($data['print_form_id'] ?? 0),
+            (string) ($data['print_form_name'] ?? ''),
+        );
+    }
+
+    /**
+     * @psalm-suppress MixedArgumentTypeCoercion
+     */
+    private function denormalizeForm(array $data): Form
+    {
+        return new Form(
             (int) ($data['id'] ?? 0),
             (string) ($data['name'] ?? ''),
             (bool) ($data['deleted_or_closed'] ?? false),
             array_map(fn (mixed $val): string => (string) $val, (array) ($data['steps'] ?? [])),
             array_map(fn (array $val): FormField => $this->denormalizeFormField($val), (array) ($data['fields'] ?? [])),
+            array_map(fn (array $val): PrintForm => $this->denormalizePrintForm($val), (array) ($data['print_forms'] ?? [])),
         );
     }
 

@@ -12,7 +12,7 @@ use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
-use SuareSu\PyrusClient\Entity\Form\FormList;
+use SuareSu\PyrusClient\Entity\Form\Form;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 
 /**
@@ -119,11 +119,24 @@ final class PyrusGatewayImpl implements PyrusGateway
     {
         $raw = $this->client->request(PyrusEndpoint::FORM_INDEX);
         $data = (array) ($raw['forms'] ?? []);
-        $type = FormList::class . '[]';
+        $type = Form::class . '[]';
 
-        /** @var FormList[] */
+        /** @var Form[] */
         $list = $this->dataConverter->denormalize($data, $type);
 
         return $list;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getForm(int $id): Form
+    {
+        $raw = $this->client->request(PyrusEndpoint::FORM_READ, $id);
+
+        /** @var Form */
+        $form = $this->dataConverter->denormalize($raw, Form::class);
+
+        return $form;
     }
 }
