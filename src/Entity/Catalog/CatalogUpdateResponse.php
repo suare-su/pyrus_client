@@ -15,10 +15,10 @@ class CatalogUpdateResponse
      * @param CatalogHeader[]     $catalogHeaders
      */
     public function __construct(
-        public bool $apply = true,
-        public array $added = [],
-        public array $deleted = [],
-        public array $catalogHeaders = [],
+        public readonly bool $apply = true,
+        public readonly array $added = [],
+        public readonly array $deleted = [],
+        public readonly array $catalogHeaders = [],
     ) {
     }
 }

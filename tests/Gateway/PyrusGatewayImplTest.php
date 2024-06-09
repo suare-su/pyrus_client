@@ -12,6 +12,7 @@ use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
+use SuareSu\PyrusClient\Entity\Form\Form;
 use SuareSu\PyrusClient\Gateway\PyrusGatewayImpl;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 use SuareSu\PyrusClient\Tests\BaseCase;
@@ -21,6 +22,16 @@ use SuareSu\PyrusClient\Tests\BaseCase;
  */
 final class PyrusGatewayImplTest extends BaseCase
 {
+    private const ID = 123;
+    private const RESULT = [
+        'result_1' => 'result 1',
+        'result_2' => 'result 2',
+    ];
+    private const DENORMALIZED_INPUT = [
+        'denormalized_1' => 'denormalized 1',
+        'denormalized_2' => 'denormalized 2',
+    ];
+
     /**
      * @test
      */
@@ -66,10 +77,6 @@ final class PyrusGatewayImplTest extends BaseCase
      */
     public function testGetCatalogs(): void
     {
-        $result = [
-            'result' => 'value',
-            'result_1' => 'value 1',
-        ];
         $normalizedResult = [
             $this->mock(Catalog::class),
             $this->mock(Catalog::class),
@@ -78,11 +85,11 @@ final class PyrusGatewayImplTest extends BaseCase
         $client = $this->createClientAwaitsRequest(
             PyrusEndpoint::CATALOG_INDEX,
             [
-                'catalogs' => $result,
+                'catalogs' => self::RESULT,
             ]
         );
         $dataConverter = $this->createDataConverterAwaitsDenormalize(
-            $result,
+            self::RESULT,
             Catalog::class . '[]',
             $normalizedResult
         );
@@ -98,29 +105,24 @@ final class PyrusGatewayImplTest extends BaseCase
      */
     public function testGetCatalog(): void
     {
-        $id = 123;
-        $result = [
-            'result' => 'value',
-            'result_1' => 'value 1',
-        ];
         $normalizedResult = $this->mock(Catalog::class);
 
         $client = $this->createClientAwaitsRequest(
             PyrusEndpoint::CATALOG_READ,
-            $result,
-            $id,
+            self::RESULT,
+            self::ID,
             [
                 'include_deleted' => false,
             ]
         );
         $dataConverter = $this->createDataConverterAwaitsDenormalize(
-            $result,
+            self::RESULT,
             Catalog::class,
             $normalizedResult
         );
 
         $gateway = new PyrusGatewayImpl($client, $dataConverter);
-        $res = $gateway->getCatalog($id);
+        $res = $gateway->getCatalog(self::ID);
 
         $this->assertSame($normalizedResult, $res);
     }
@@ -131,31 +133,23 @@ final class PyrusGatewayImplTest extends BaseCase
     public function testCreateCatalog(): void
     {
         $catalogCreate = $this->mock(CatalogCreate::class);
-        $catalogCreateDenormalized = [
-            'catalog_create_denormalized' => 'value',
-            'catalog_create_denormalized_1' => 'value 1',
-        ];
-        $result = [
-            'result' => 'value',
-            'result_1' => 'value 1',
-        ];
         $normalizedResult = $this->mock(Catalog::class);
 
         $client = $this->createClientAwaitsRequest(
             endpoint: PyrusEndpoint::CATALOG_CREATE,
-            result: $result,
-            payload: $catalogCreateDenormalized
+            result: self::RESULT,
+            payload: self::DENORMALIZED_INPUT
         );
         $dataConverter = $this->createDataConverter(
             [
                 [
                     $catalogCreate,
-                    $catalogCreateDenormalized,
+                    self::DENORMALIZED_INPUT,
                 ],
             ],
             [
                 [
-                    $result,
+                    self::RESULT,
                     Catalog::class,
                     $normalizedResult,
                 ],
@@ -173,36 +167,25 @@ final class PyrusGatewayImplTest extends BaseCase
      */
     public function testUpdateCatalog(): void
     {
-        $id = 123;
         $catalogUpdate = $this->mock(CatalogUpdate::class);
-        $catalogUpdateDenormalized = [
-            'catalog_create_denormalized' => 'value',
-            'catalog_create_denormalized_1' => 'value 1',
-        ];
-        $result = [
-            'result' => 'value',
-            'result_1' => 'value 1',
-        ];
         $normalizedResult = $this->mock(CatalogUpdateResponse::class);
 
         $client = $this->createClientAwaitsRequest(
             PyrusEndpoint::CATALOG_UPDATE,
-            $result,
-            [
-                $id,
-            ],
-            $catalogUpdateDenormalized
+            self::RESULT,
+            self::ID,
+            self::DENORMALIZED_INPUT
         );
         $dataConverter = $this->createDataConverter(
             [
                 [
                     $catalogUpdate,
-                    $catalogUpdateDenormalized,
+                    self::DENORMALIZED_INPUT,
                 ],
             ],
             [
                 [
-                    $result,
+                    self::RESULT,
                     CatalogUpdateResponse::class,
                     $normalizedResult,
                 ],
@@ -210,7 +193,59 @@ final class PyrusGatewayImplTest extends BaseCase
         );
 
         $gateway = new PyrusGatewayImpl($client, $dataConverter);
-        $res = $gateway->updateCatalog($id, $catalogUpdate);
+        $res = $gateway->updateCatalog(self::ID, $catalogUpdate);
+
+        $this->assertSame($normalizedResult, $res);
+    }
+
+    /**
+     * @test
+     */
+    public function testGetForms(): void
+    {
+        $normalizedResult = [
+            $this->mock(Form::class),
+            $this->mock(Form::class),
+        ];
+
+        $client = $this->createClientAwaitsRequest(
+            PyrusEndpoint::FORM_INDEX,
+            [
+                'forms' => self::RESULT,
+            ]
+        );
+        $dataConverter = $this->createDataConverterAwaitsDenormalize(
+            self::RESULT,
+            Form::class . '[]',
+            $normalizedResult
+        );
+
+        $gateway = new PyrusGatewayImpl($client, $dataConverter);
+        $res = $gateway->getForms();
+
+        $this->assertSame($normalizedResult, $res);
+    }
+
+    /**
+     * @test
+     */
+    public function testGetForm(): void
+    {
+        $normalizedResult = $this->mock(Form::class);
+
+        $client = $this->createClientAwaitsRequest(
+            PyrusEndpoint::FORM_READ,
+            self::RESULT,
+            self::ID
+        );
+        $dataConverter = $this->createDataConverterAwaitsDenormalize(
+            self::RESULT,
+            Form::class,
+            $normalizedResult
+        );
+
+        $gateway = new PyrusGatewayImpl($client, $dataConverter);
+        $res = $gateway->getForm(self::ID);
 
         $this->assertSame($normalizedResult, $res);
     }

@@ -20,6 +20,9 @@ enum PyrusEndpoint
     case CATALOG_READ;
     case CATALOG_UPDATE;
 
+    case FORM_INDEX;
+    case FORM_READ;
+
     /**
      * Return path related to this enum item.
      *
@@ -32,6 +35,9 @@ enum PyrusEndpoint
 
             self::CATALOG_INDEX, self::CATALOG_CREATE => '/catalogs',
             self::CATALOG_READ, self::CATALOG_UPDATE => '/catalogs/%s',
+
+            self::FORM_INDEX => '/forms',
+            self::FORM_READ => '/forms/%s',
         };
     }
 
@@ -46,6 +52,8 @@ enum PyrusEndpoint
             self::CATALOG_INDEX, self::CATALOG_READ => PyrusRequestMethod::GET,
             self::CATALOG_UPDATE => PyrusRequestMethod::POST,
             self::CATALOG_CREATE => PyrusRequestMethod::PUT,
+
+            self::FORM_INDEX, self::FORM_READ => PyrusRequestMethod::GET,
         };
     }
 

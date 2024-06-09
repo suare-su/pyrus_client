@@ -14,9 +14,9 @@ class CatalogUpdate
      * @param CatalogItemCreate[] $items
      */
     public function __construct(
-        public bool $apply = true,
-        public array $catalogHeaders = [],
-        public array $items = [],
+        public readonly bool $apply = true,
+        public readonly array $catalogHeaders = [],
+        public readonly array $items = [],
     ) {
     }
 }

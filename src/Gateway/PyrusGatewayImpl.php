@@ -12,6 +12,7 @@ use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
+use SuareSu\PyrusClient\Entity\Form\Form;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 
 /**
@@ -81,9 +82,8 @@ final class PyrusGatewayImpl implements PyrusGateway
     public function createCatalog(CatalogCreate $catalog): Catalog
     {
         $raw = $this->client->request(
-            PyrusEndpoint::CATALOG_CREATE,
-            [],
-            $this->dataConverter->normalize($catalog)
+            endpoint: PyrusEndpoint::CATALOG_CREATE,
+            payload: $this->dataConverter->normalize($catalog)
         );
 
         /** @var Catalog */
@@ -99,9 +99,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     {
         $raw = $this->client->request(
             PyrusEndpoint::CATALOG_UPDATE,
-            [
-                $id,
-            ],
+            $id,
             $this->dataConverter->normalize($catalog)
         );
 
@@ -109,5 +107,33 @@ final class PyrusGatewayImpl implements PyrusGateway
         $updatedCatalog = $this->dataConverter->denormalize($raw, CatalogUpdateResponse::class);
 
         return $updatedCatalog;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getForms(): iterable
+    {
+        $raw = $this->client->request(PyrusEndpoint::FORM_INDEX);
+        $data = (array) ($raw['forms'] ?? []);
+        $type = Form::class . '[]';
+
+        /** @var Form[] */
+        $list = $this->dataConverter->denormalize($data, $type);
+
+        return $list;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getForm(int $id): Form
+    {
+        $raw = $this->client->request(PyrusEndpoint::FORM_READ, $id);
+
+        /** @var Form */
+        $form = $this->dataConverter->denormalize($raw, Form::class);
+
+        return $form;
     }
 }

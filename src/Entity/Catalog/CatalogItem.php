@@ -13,8 +13,8 @@ class CatalogItem
      * @param array<string, string> $values
      */
     public function __construct(
-        public int $itemId,
-        public array $values,
+        public readonly int $itemId,
+        public readonly array $values,
     ) {
     }
 }

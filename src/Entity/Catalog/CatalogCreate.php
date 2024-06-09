@@ -14,9 +14,9 @@ class CatalogCreate
      * @param CatalogItemCreate[] $items
      */
     public function __construct(
-        public string $name,
-        public array $catalogHeaders = [],
-        public array $items = [],
+        public readonly string $name,
+        public readonly array $catalogHeaders = [],
+        public readonly array $items = [],
     ) {
     }
 }

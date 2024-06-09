@@ -3,6 +3,10 @@
     "source": {
         "directories": [
             "src"
+        ],
+        "excludes": [
+            "DataConverter/EntityConverter.php",
+            "Entity"
         ]
     },
     "logs": {

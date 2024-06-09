@@ -181,26 +181,21 @@ final class SerializerGenerator
             }
             $type = $definition[0];
             $propertyKey = CaseHelper::camelToSnake($property);
-            $propertyValue = null;
-            $builtInType = $type->getBuiltinType();
             if ($type->isCollection()) {
                 $valueType = $type->getCollectionValueTypes()[0] ?? null;
-                $builtInValueType = $valueType?->getBuiltinType();
                 $valueDescription = $descriptions[(string) $valueType?->getClassName()] ?? null;
-                if (\in_array($builtInValueType, self::SCALAR_TYPES)) {
-                    $propertyValue = "\$object->{$property}";
-                } elseif ($valueDescription) {
+                if ($valueDescription) {
                     $propertyValue = 'array_map(';
                     $propertyValue .= "fn ({$valueDescription->shortClassName} \$val): array => \$this->normalize{$valueDescription->shortClassName}(\$val),";
                     $propertyValue .= " \$object->{$property}";
                     $propertyValue .= ')';
+                } else {
+                    $propertyValue = "\$object->{$property}";
                 }
-            } elseif (\in_array($builtInType, self::SCALAR_TYPES)) {
+            } else {
                 $propertyValue = "\$object->{$property}";
             }
-            if (null !== $propertyValue) {
-                $items[] = "'{$propertyKey}' => {$propertyValue}";
-            }
+            $items[] = "'{$propertyKey}' => {$propertyValue}";
         }
 
         $body = PhpLineHelper::return(PhpLineHelper::array($items));
@@ -299,6 +294,8 @@ final class SerializerGenerator
                     $propertyValue = 'array_map(';
                     $propertyValue .= "fn (array \$val): {$valueDescription->shortClassName} => \$this->denormalize{$valueDescription->shortClassName}(\$val),";
                     $propertyValue .= " (array) (\$data['{$propertyKey}'] ?? []))";
+                } else {
+                    $propertyValue = "(array) (\$data['{$propertyKey}'] ?? [])";
                 }
             } elseif (\in_array($builtInType, self::SCALAR_TYPES)) {
                 $default = self::SCALAR_TYPES_DEFAULTS[$builtInType];

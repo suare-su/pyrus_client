@@ -116,6 +116,51 @@ final class PyrusClientImplTest extends BaseCase
     /**
      * @test
      */
+    public function testRequestWithIntUrlParam(): void
+    {
+        $endpoint = PyrusEndpoint::CATALOG_UPDATE;
+        $urlParam = 123;
+        $payload = [
+            'test' => 'payload',
+        ];
+        $response = [
+            'test' => 'response',
+            'test_1' => 'response 1',
+        ];
+
+        $authToken = $this->createAuthToken();
+
+        $options = $this->createOptions();
+
+        $transport = $this->mock(PyrusTransport::class);
+        $transport->expects($this->once())
+            ->method('request')
+            ->with(
+                $this->callback(
+                    fn (PyrusRequest $request): bool => $request->method === $endpoint->method()
+                        && $request->url === rtrim($authToken->apiUrl, '/') . $endpoint->path([$urlParam])
+                        && $request->payload === $payload
+                        && $request->headers === [
+                            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
+                            PyrusHeader::CONTENT_TYPE->value => 'application/json',
+                        ]
+                ),
+                $this->identicalTo($options)
+            )
+            ->willReturn(
+                $this->createPyrusResponse($response)
+            );
+
+        $client = new PyrusClientImpl($transport, $options);
+        $client->useAuthToken($authToken);
+        $res = $client->request($endpoint, $urlParam, $payload);
+
+        $this->assertSame($response, $res);
+    }
+
+    /**
+     * @test
+     */
     public function testRequestWithTokenRefresh(): void
     {
         $endpoint = PyrusEndpoint::CATALOG_INDEX;
@@ -250,6 +295,29 @@ final class PyrusClientImplTest extends BaseCase
         $this->expectException(PyrusApiException::class);
         $this->expectExceptionMessage($response['error']);
         $this->expectExceptionCode($response['error_code']);
+        $client->request($endpoint);
+    }
+
+    /**
+     * @test
+     */
+    public function testRequestCantParseResponseException(): void
+    {
+        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $authToken = $this->createAuthToken();
+
+        $transport = $this->mock(PyrusTransport::class);
+        $transport->expects($this->once())
+            ->method('request')
+            ->willReturn(
+                new PyrusResponse(PyrusResponseStatus::OK, '{test:')
+            );
+
+        $client = new PyrusClientImpl($transport, $this->createOptions());
+        $client->useAuthToken($authToken);
+
+        $this->expectException(PyrusTransportException::class);
+        $this->expectExceptionMessage("Can't convert response payload to an array");
         $client->request($endpoint);
     }
 
