@@ -301,6 +301,29 @@ final class PyrusClientImplTest extends BaseCase
     /**
      * @test
      */
+    public function testRequestCantParseResponseException(): void
+    {
+        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $authToken = $this->createAuthToken();
+
+        $transport = $this->mock(PyrusTransport::class);
+        $transport->expects($this->once())
+            ->method('request')
+            ->willReturn(
+                new PyrusResponse(PyrusResponseStatus::OK, '{test:')
+            );
+
+        $client = new PyrusClientImpl($transport, $this->createOptions());
+        $client->useAuthToken($authToken);
+
+        $this->expectException(PyrusTransportException::class);
+        $this->expectExceptionMessage("Can't convert response payload to an array");
+        $client->request($endpoint);
+    }
+
+    /**
+     * @test
+     */
     public function testRequestApiExceptionNoErrorCode(): void
     {
         $endpoint = PyrusEndpoint::CATALOG_INDEX;
