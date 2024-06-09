@@ -270,7 +270,7 @@ final class SerializerGenerator
             $type = $definition[0];
             $propertyKey = $this->camelCaseToSnakeCase($property);
             $builtInType = $type->getBuiltinType();
-            if (\in_array($builtInType, self::SCALAR_TYPES)) {
+            if (!$type->isCollection() && \in_array($builtInType, self::SCALAR_TYPES)) {
                 $default = self::SCALAR_TYPES_DEFAULTS[$builtInType];
                 $body .= "    ($builtInType) (\$data['{$propertyKey}'] ?? {$default}),\n";
             } elseif ($type->isCollection()) {

@@ -8,6 +8,8 @@ use SuareSu\PyrusClient\Client\PyrusAuthToken;
 use SuareSu\PyrusClient\Client\PyrusCredentials;
 use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
 
 /**
  * Object that implements all concrete requests for Pyrus.
@@ -34,4 +36,6 @@ interface PyrusGateway
     public function getCatalog(int $id, bool $includeDeleted = false): Catalog;
 
     public function createCatalog(CatalogCreate $catalog): Catalog;
+
+    public function updateCatalog(int $id, CatalogUpdate $catalog): CatalogUpdateResponse;
 }

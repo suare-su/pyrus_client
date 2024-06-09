@@ -10,7 +10,7 @@ namespace SuareSu\PyrusClient\Entity\Catalog;
 class CatalogItem
 {
     /**
-     * @param string[] $values
+     * @param array<string, string> $values
      */
     public function __construct(
         public int $itemId,

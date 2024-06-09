@@ -10,6 +10,8 @@ use SuareSu\PyrusClient\Client\PyrusCredentials;
 use SuareSu\PyrusClient\DataConverter\PyrusDataConverter;
 use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 
 /**
@@ -88,5 +90,24 @@ final class PyrusGatewayImpl implements PyrusGateway
         $createdCatalog = $this->dataConverter->denormalize($raw, Catalog::class);
 
         return $createdCatalog;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function updateCatalog(int $id, CatalogUpdate $catalog): CatalogUpdateResponse
+    {
+        $raw = $this->client->request(
+            PyrusEndpoint::CATALOG_UPDATE,
+            [
+                $id,
+            ],
+            $this->dataConverter->normalize($catalog)
+        );
+
+        /** @var CatalogUpdateResponse */
+        $updatedCatalog = $this->dataConverter->denormalize($raw, CatalogUpdateResponse::class);
+
+        return $updatedCatalog;
     }
 }

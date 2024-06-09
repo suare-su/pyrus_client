@@ -10,6 +10,8 @@ use SuareSu\PyrusClient\Client\PyrusCredentials;
 use SuareSu\PyrusClient\DataConverter\PyrusDataConverter;
 use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
+use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
 use SuareSu\PyrusClient\Gateway\PyrusGatewayImpl;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 use SuareSu\PyrusClient\Tests\BaseCase;
@@ -162,6 +164,53 @@ final class PyrusGatewayImplTest extends BaseCase
 
         $gateway = new PyrusGatewayImpl($client, $dataConverter);
         $res = $gateway->createCatalog($catalogCreate);
+
+        $this->assertSame($normalizedResult, $res);
+    }
+
+    /**
+     * @test
+     */
+    public function testUpdateCatalog(): void
+    {
+        $id = 123;
+        $catalogUpdate = $this->mock(CatalogUpdate::class);
+        $catalogUpdateDenormalized = [
+            'catalog_create_denormalized' => 'value',
+            'catalog_create_denormalized_1' => 'value 1',
+        ];
+        $result = [
+            'result' => 'value',
+            'result_1' => 'value 1',
+        ];
+        $normalizedResult = $this->mock(CatalogUpdateResponse::class);
+
+        $client = $this->createClientAwaitsRequest(
+            PyrusEndpoint::CATALOG_UPDATE,
+            $result,
+            [
+                $id,
+            ],
+            $catalogUpdateDenormalized
+        );
+        $dataConverter = $this->createDataConverter(
+            [
+                [
+                    $catalogUpdate,
+                    $catalogUpdateDenormalized,
+                ],
+            ],
+            [
+                [
+                    $result,
+                    CatalogUpdateResponse::class,
+                    $normalizedResult,
+                ],
+            ]
+        );
+
+        $gateway = new PyrusGatewayImpl($client, $dataConverter);
+        $res = $gateway->updateCatalog($id, $catalogUpdate);
 
         $this->assertSame($normalizedResult, $res);
     }
