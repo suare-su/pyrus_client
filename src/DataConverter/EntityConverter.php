@@ -182,6 +182,9 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         ];
     }
 
+    /**
+     * @psalm-suppress MixedArgumentTypeCoercion
+     */
     private function denormalizeCatalogUpdate(array $data): CatalogUpdate
     {
         return new CatalogUpdate(
@@ -191,6 +194,9 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         );
     }
 
+    /**
+     * @psalm-suppress MixedArgumentTypeCoercion
+     */
     private function denormalizeCatalogItem(array $data): CatalogItem
     {
         return new CatalogItem(
@@ -199,6 +205,9 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         );
     }
 
+    /**
+     * @psalm-suppress MixedArgumentTypeCoercion
+     */
     private function denormalizeCatalogCreate(array $data): CatalogCreate
     {
         return new CatalogCreate(
@@ -208,6 +217,9 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         );
     }
 
+    /**
+     * @psalm-suppress MixedArgumentTypeCoercion
+     */
     private function denormalizeCatalog(array $data): Catalog
     {
         return new Catalog(
@@ -222,6 +234,9 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         );
     }
 
+    /**
+     * @psalm-suppress MixedArgumentTypeCoercion
+     */
     private function denormalizeCatalogHeader(array $data): CatalogHeader
     {
         return new CatalogHeader(
@@ -230,6 +245,9 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         );
     }
 
+    /**
+     * @psalm-suppress MixedArgumentTypeCoercion
+     */
     private function denormalizeCatalogItemCreate(array $data): CatalogItemCreate
     {
         return new CatalogItemCreate(
@@ -237,6 +255,9 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
         );
     }
 
+    /**
+     * @psalm-suppress MixedArgumentTypeCoercion
+     */
     private function denormalizeCatalogUpdateResponse(array $data): CatalogUpdateResponse
     {
         return new CatalogUpdateResponse(

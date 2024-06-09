@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SuareSu\PyrusClient\Scripts\SerializerGenerator;
+namespace SuareSu\PyrusClient\Scripts\DTO;
 
 use Symfony\Component\PropertyInfo\Type;
 
