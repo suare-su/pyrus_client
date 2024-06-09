@@ -100,6 +100,7 @@ final class SerializerGenerator
 
         $class = $ns->addClass($className)
             ->setFinal()
+            ->addComment('@psalm-api')
             ->addImplement(DenormalizerInterface::class)
             ->addImplement(NormalizerInterface::class);
 
@@ -330,6 +331,7 @@ final class SerializerGenerator
         $method = $class->addMethod('getSupportedTypes')
             ->setReturnType('array')
             ->addComment('{@inheritDoc}')
+            ->addComment('@psalm-suppress UnusedParam')
             ->setVisibility('public')
             ->setBody($body);
 

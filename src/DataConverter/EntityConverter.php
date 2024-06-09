@@ -18,6 +18,9 @@ use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
+/**
+ * @psalm-api
+ */
 final class EntityConverter implements DenormalizerInterface, NormalizerInterface
 {
     /**
@@ -124,6 +127,8 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
 
     /**
      * {@inheritDoc}
+     *
+     * @psalm-suppress UnusedParam
      */
     public function getSupportedTypes(?string $format): array
     {

@@ -23,7 +23,6 @@ abstract class BaseCase extends TestCase
      */
     protected function mock(string $className): MockObject
     {
-        /** @var MockObject&T */
         $mock = $this->getMockBuilder($className)
             ->disableOriginalConstructor()
             ->getMock();

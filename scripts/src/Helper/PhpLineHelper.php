@@ -8,8 +8,6 @@ namespace SuareSu\PyrusClient\Scripts\Helper;
  * Helper that can generate line for php file.
  *
  * @internal
- *
- * @psalm-api
  */
 final class PhpLineHelper
 {
@@ -18,6 +16,9 @@ final class PhpLineHelper
     public const SEMICOLON = ';';
     public const COMMA = ',';
 
+    /**
+     * @psalm-suppress UnusedConstructor
+     */
     private function __construct()
     {
     }

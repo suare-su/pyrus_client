@@ -8,11 +8,12 @@ namespace SuareSu\PyrusClient\Scripts\Helper;
  * Helper that can convert case notation for variables and methods names.
  *
  * @internal
- *
- * @psalm-api
  */
 final class CaseHelper
 {
+    /**
+     * @psalm-suppress UnusedConstructor
+     */
     private function __construct()
     {
     }
