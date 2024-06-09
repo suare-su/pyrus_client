@@ -29,5 +29,6 @@
                 <directory name="./tests"/>
             </errorLevel>
         </MixedAssignment>
+        <MissingClassConstType errorLevel="suppress"/>
     </issueHandlers>
 </psalm>
