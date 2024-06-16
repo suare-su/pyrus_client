@@ -6,15 +6,18 @@ namespace SuareSu\PyrusClient\DataConverter;
 
 use SuareSu\PyrusClient\Exception\PyrusDataConverterException;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
  * Object that converts data between request/response payload and internal objects.
  */
 final class PyrusDataConverterSymfonySerializer implements PyrusDataConverter
 {
-    public function __construct(private readonly Serializer $serializer)
-    {
+    public function __construct(
+        private readonly NormalizerInterface $normalizer,
+        private readonly DenormalizerInterface $denormalizer
+    ) {
     }
 
     /**
@@ -24,9 +27,10 @@ final class PyrusDataConverterSymfonySerializer implements PyrusDataConverter
     {
         try {
             /** @var array<string, mixed> */
-            $normalizedData = $this->serializer->normalize(
-                data: $data,
-                context: [
+            $normalizedData = $this->normalizer->normalize(
+                $data,
+                null,
+                [
                     AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
                 ]
             );
@@ -44,7 +48,7 @@ final class PyrusDataConverterSymfonySerializer implements PyrusDataConverter
     {
         try {
             /** @var object|array */
-            $denormalizedData = $this->serializer->denormalize($data, $type);
+            $denormalizedData = $this->denormalizer->denormalize($data, $type);
         } catch (\Throwable $e) {
             throw new PyrusDataConverterException($e->getMessage(), (int) $e->getCode(), $e);
         }

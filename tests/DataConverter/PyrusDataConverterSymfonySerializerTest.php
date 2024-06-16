@@ -40,7 +40,7 @@ final class PyrusDataConverterSymfonySerializerTest extends BaseCase
             )
             ->willReturn($normalizedData);
 
-        $dataConverter = new PyrusDataConverterSymfonySerializer($serializer);
+        $dataConverter = new PyrusDataConverterSymfonySerializer($serializer, $serializer);
         $res = $dataConverter->normalize($data);
 
         $this->assertSame($normalizedData, $res);
@@ -60,7 +60,7 @@ final class PyrusDataConverterSymfonySerializerTest extends BaseCase
             ->method('normalize')
             ->willThrowException(new \RuntimeException($exceptionMessage));
 
-        $dataConverter = new PyrusDataConverterSymfonySerializer($serializer);
+        $dataConverter = new PyrusDataConverterSymfonySerializer($serializer, $serializer);
 
         $this->expectExceptionObject($expectedException);
         $dataConverter->normalize($data);
@@ -86,7 +86,7 @@ final class PyrusDataConverterSymfonySerializerTest extends BaseCase
             )
             ->willReturn($denormalizedData);
 
-        $dataConverter = new PyrusDataConverterSymfonySerializer($serializer);
+        $dataConverter = new PyrusDataConverterSymfonySerializer($serializer, $serializer);
         $res = $dataConverter->denormalize($data, $type);
 
         $this->assertSame($denormalizedData, $res);
@@ -109,7 +109,7 @@ final class PyrusDataConverterSymfonySerializerTest extends BaseCase
             ->method('denormalize')
             ->willThrowException(new \RuntimeException($exceptionMessage));
 
-        $dataConverter = new PyrusDataConverterSymfonySerializer($serializer);
+        $dataConverter = new PyrusDataConverterSymfonySerializer($serializer, $serializer);
 
         $this->expectExceptionObject($expectedException);
         $dataConverter->denormalize($data, $type);
