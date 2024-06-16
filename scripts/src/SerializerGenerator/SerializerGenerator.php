@@ -332,6 +332,7 @@ final class SerializerGenerator
             ->setReturnType('array')
             ->addComment('{@inheritDoc}')
             ->addComment('@psalm-suppress UnusedParam')
+            ->addComment('@psalm-suppress LessSpecificImplementedReturnType')
             ->setVisibility('public')
             ->setBody($body);
 
