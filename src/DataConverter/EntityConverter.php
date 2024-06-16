@@ -129,6 +129,7 @@ final class EntityConverter implements DenormalizerInterface, NormalizerInterfac
      * {@inheritDoc}
      *
      * @psalm-suppress UnusedParam
+     * @psalm-suppress LessSpecificImplementedReturnType
      */
     public function getSupportedTypes(?string $format): array
     {
