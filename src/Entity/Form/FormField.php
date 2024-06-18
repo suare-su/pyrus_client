@@ -6,6 +6,8 @@ namespace SuareSu\PyrusClient\Entity\Form;
 
 /**
  * DTO for form field entity from Pyrus.
+ *
+ * @psalm-api
  */
 class FormField
 {

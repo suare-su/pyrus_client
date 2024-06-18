@@ -6,6 +6,8 @@ namespace SuareSu\PyrusClient\Entity\Catalog;
 
 /**
  * DTO for catalog update response.
+ *
+ * @psalm-api
  */
 class CatalogUpdateResponse
 {

@@ -6,6 +6,8 @@ namespace SuareSu\PyrusClient\Entity\Catalog;
 
 /**
  * DTO for catalog header entity from Pyrus.
+ *
+ * @psalm-api
  */
 class CatalogItem
 {
