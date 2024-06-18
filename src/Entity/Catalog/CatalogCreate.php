@@ -6,6 +6,8 @@ namespace SuareSu\PyrusClient\Entity\Catalog;
 
 /**
  * DTO for catalog creation.
+ *
+ * @psalm-api
  */
 class CatalogCreate
 {
