@@ -30,7 +30,7 @@ final class PyrusClientImpl implements PyrusClient
 
     public function __construct(
         private readonly PyrusTransport $transport,
-        private readonly PyrusClientOptions $options
+        private readonly PyrusClientOptions $options,
     ) {
     }
 
@@ -84,8 +84,15 @@ final class PyrusClientImpl implements PyrusClient
     public function request(PyrusEndpoint $endpoint, array|float|int|string $urlParams = [], ?array $payload = null): array
     {
         $authToken = $this->getOrRequestAuthorizationToken()->accessToken;
+
         $method = $endpoint->method();
+
         $url = $this->createEndpointUrl($endpoint, $urlParams);
+        if (PyrusRequestMethod::GET === $endpoint->method() && null !== $payload) {
+            $url = $this->applyQueryToUrl($url, $payload);
+            $payload = null;
+        }
+
         $headers = [
             PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken}",
         ];
@@ -187,7 +194,43 @@ final class PyrusClientImpl implements PyrusClient
             \is_array($urlParams) ? $urlParams : [$urlParams]
         );
 
-        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+        return rtrim($baseUrl, '/') . '/' . trim($path, '/?');
+    }
+
+    /**
+     * Add payload to url for get requests.
+     *
+     * @param array<string, mixed> $query
+     *
+     * @psalm-param non-empty-string $url
+     *
+     * @psalm-return non-empty-string
+     *
+     * @psalm-suppress MixedAssignment
+     */
+    private function applyQueryToUrl(string $url, array $query): string
+    {
+        $queryString = '';
+
+        $queryTrueParams = [];
+        $queryStringParams = [];
+        foreach ($query as $key => $value) {
+            if (true === $value) {
+                $queryTrueParams[] = $key;
+            } elseif (!\is_bool($value) && null !== $value) {
+                $queryStringParams[$key] = $value;
+            }
+        }
+
+        if (!empty($queryTrueParams)) {
+            $queryString .= '&' . implode('&', $queryTrueParams);
+        }
+
+        if (!empty($queryStringParams)) {
+            $queryString .= '&' . http_build_query($queryStringParams);
+        }
+
+        return rtrim($url, '/&?') . '?' . trim($queryString, '&?/=');
     }
 
     /**

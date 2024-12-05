@@ -22,7 +22,7 @@ final class PyrusGatewayImpl implements PyrusGateway
 {
     public function __construct(
         private readonly PyrusClient $client,
-        private readonly PyrusDataConverter $dataConverter
+        private readonly PyrusDataConverter $dataConverter,
     ) {
     }
 
