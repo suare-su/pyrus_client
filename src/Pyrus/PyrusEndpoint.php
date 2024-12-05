@@ -23,6 +23,9 @@ enum PyrusEndpoint
     case FORM_INDEX;
     case FORM_READ;
 
+    case TEST_GET;
+    case TEST_POST_PATH_PARAMS;
+
     /**
      * Return path related to this enum item.
      *
@@ -38,6 +41,9 @@ enum PyrusEndpoint
 
             self::FORM_INDEX => '/forms',
             self::FORM_READ => '/forms/%s',
+
+            self::TEST_GET => '/test',
+            self::TEST_POST_PATH_PARAMS => '/test/%s',
         };
     }
 
@@ -54,6 +60,9 @@ enum PyrusEndpoint
             self::CATALOG_CREATE => PyrusRequestMethod::PUT,
 
             self::FORM_INDEX, self::FORM_READ => PyrusRequestMethod::GET,
+
+            self::TEST_GET => PyrusRequestMethod::GET,
+            self::TEST_POST_PATH_PARAMS => PyrusRequestMethod::POST,
         };
     }
 
@@ -76,7 +85,7 @@ enum PyrusEndpoint
         }
 
         /** @psalm-var non-empty-string */
-        $res = sprintf($path, ...$params);
+        $res = \sprintf($path, ...$params);
 
         return $res;
     }

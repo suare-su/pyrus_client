@@ -69,9 +69,56 @@ final class PyrusClientImplTest extends BaseCase
     /**
      * @test
      */
-    public function testRequest(): void
+    public function testRequestGet(): void
     {
-        $endpoint = PyrusEndpoint::CATALOG_UPDATE;
+        $endpoint = PyrusEndpoint::TEST_GET;
+        $payload = [
+            'test' => 'payload',
+            'test_bool_false' => false,
+            'test_bool_null' => null,
+            'test_bool_true' => true,
+        ];
+        $response = [
+            'test' => 'response',
+            'test_1' => 'response 1',
+        ];
+
+        $authToken = $this->createAuthToken();
+
+        $options = $this->createOptions();
+
+        $transport = $this->mock(PyrusTransport::class);
+        $transport->expects($this->once())
+            ->method('request')
+            ->with(
+                $this->callback(
+                    fn (PyrusRequest $request): bool => $request->method === $endpoint->method()
+                        && $request->url === rtrim($authToken->apiUrl, '/') . $endpoint->path() . '?test_bool_true&test=payload'
+                        && null === $request->payload
+                        && $request->headers === [
+                            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
+                            PyrusHeader::CONTENT_TYPE->value => 'application/json',
+                        ]
+                ),
+                $this->identicalTo($options)
+            )
+            ->willReturn(
+                $this->createPyrusResponse($response)
+            );
+
+        $client = new PyrusClientImpl($transport, $options);
+        $client->useAuthToken($authToken);
+        $res = $client->request(endpoint: $endpoint, payload: $payload);
+
+        $this->assertSame($response, $res);
+    }
+
+    /**
+     * @test
+     */
+    public function testRequestPost(): void
+    {
+        $endpoint = PyrusEndpoint::TEST_POST_PATH_PARAMS;
         $urlParams = [
             123,
         ];
@@ -118,7 +165,7 @@ final class PyrusClientImplTest extends BaseCase
      */
     public function testRequestWithIntUrlParam(): void
     {
-        $endpoint = PyrusEndpoint::CATALOG_UPDATE;
+        $endpoint = PyrusEndpoint::TEST_POST_PATH_PARAMS;
         $urlParam = 123;
         $payload = [
             'test' => 'payload',
@@ -163,7 +210,7 @@ final class PyrusClientImplTest extends BaseCase
      */
     public function testRequestWithTokenRefresh(): void
     {
-        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $endpoint = PyrusEndpoint::TEST_GET;
         $response = [
             'test' => 'response',
             'test_1' => 'response 1',
@@ -214,7 +261,7 @@ final class PyrusClientImplTest extends BaseCase
      */
     public function testRequestWithTokenRefreshAuthorizationIsNotAllowed(): void
     {
-        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $endpoint = PyrusEndpoint::TEST_GET;
         $tokenResponse = [
             'access_token' => 'access_token_1',
             'api_url' => 'api_url_1',
@@ -251,7 +298,7 @@ final class PyrusClientImplTest extends BaseCase
      */
     public function testRequestTransportException(): void
     {
-        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $endpoint = PyrusEndpoint::TEST_GET;
         $exceptionMessage = 'test exception';
         $authToken = $this->createAuthToken();
 
@@ -275,7 +322,7 @@ final class PyrusClientImplTest extends BaseCase
      */
     public function testRequestApiException(): void
     {
-        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $endpoint = PyrusEndpoint::TEST_GET;
         $response = [
             'error' => 'api error',
             'error_code' => 123,
@@ -303,7 +350,7 @@ final class PyrusClientImplTest extends BaseCase
      */
     public function testRequestCantParseResponseException(): void
     {
-        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $endpoint = PyrusEndpoint::TEST_GET;
         $authToken = $this->createAuthToken();
 
         $transport = $this->mock(PyrusTransport::class);
@@ -326,7 +373,7 @@ final class PyrusClientImplTest extends BaseCase
      */
     public function testRequestApiExceptionNoErrorCode(): void
     {
-        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $endpoint = PyrusEndpoint::TEST_GET;
         $response = [
             'error' => 'api error',
         ];
@@ -353,7 +400,7 @@ final class PyrusClientImplTest extends BaseCase
      */
     public function testRequestBadResponseStatusException(): void
     {
-        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $endpoint = PyrusEndpoint::TEST_GET;
         $authToken = $this->createAuthToken();
 
         $transport = $this->mock(PyrusTransport::class);
@@ -376,7 +423,7 @@ final class PyrusClientImplTest extends BaseCase
      */
     public function testRequestNoCredentialsException(): void
     {
-        $endpoint = PyrusEndpoint::CATALOG_INDEX;
+        $endpoint = PyrusEndpoint::TEST_GET;
         $transport = $this->mock(PyrusTransport::class);
 
         $client = new PyrusClientImpl($transport, $this->createOptions());
