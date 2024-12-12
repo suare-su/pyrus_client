@@ -16,7 +16,7 @@ class FormField
      */
     public function __construct(
         public readonly int $id,
-        public readonly string $type,
+        public readonly FormFieldType $type,
         public readonly string $name,
         public readonly string $tooltip,
         public readonly array $info = [],

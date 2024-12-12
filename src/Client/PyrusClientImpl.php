@@ -223,14 +223,14 @@ final class PyrusClientImpl implements PyrusClient
         }
 
         if (!empty($queryTrueParams)) {
-            $queryString .= '&' . implode('&', $queryTrueParams);
+            $queryString = implode('&', $queryTrueParams);
         }
 
         if (!empty($queryStringParams)) {
             $queryString .= '&' . http_build_query($queryStringParams);
         }
 
-        return rtrim($url, '/&?') . '?' . trim($queryString, '&?/=');
+        return '' === $queryString ? $url : $url . '?' . ltrim($queryString, '&');
     }
 
     /**
