@@ -74,8 +74,53 @@ final class PyrusClientImplTest extends BaseCase
         $endpoint = PyrusEndpoint::TEST_GET;
         $payload = [
             'test' => 'payload',
-            'test_bool_false' => false,
+            'test_1' => 'payload_1',
             'test_bool_null' => null,
+        ];
+        $response = [
+            'test' => 'response',
+            'test_1' => 'response 1',
+        ];
+
+        $authToken = $this->createAuthToken();
+
+        $options = $this->createOptions();
+
+        $transport = $this->mock(PyrusTransport::class);
+        $transport->expects($this->once())
+            ->method('request')
+            ->with(
+                $this->callback(
+                    fn (PyrusRequest $request): bool => $request->method === $endpoint->method()
+                        && $request->url === rtrim($authToken->apiUrl, '/') . $endpoint->path() . '?test=payload&test_1=payload_1'
+                        && null === $request->payload
+                        && $request->headers === [
+                            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
+                            PyrusHeader::CONTENT_TYPE->value => 'application/json',
+                        ]
+                ),
+                $this->identicalTo($options)
+            )
+            ->willReturn(
+                $this->createPyrusResponse($response)
+            );
+
+        $client = new PyrusClientImpl($transport, $options);
+        $client->useAuthToken($authToken);
+        $res = $client->request(endpoint: $endpoint, payload: $payload);
+
+        $this->assertSame($response, $res);
+    }
+
+    /**
+     * @test
+     */
+    public function testRequestGetWithBoolParam(): void
+    {
+        $endpoint = PyrusEndpoint::TEST_GET;
+        $payload = [
+            'test' => 'payload',
+            'test_bool_false' => false,
             'test_bool_true' => true,
         ];
         $response = [
