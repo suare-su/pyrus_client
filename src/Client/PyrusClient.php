@@ -17,9 +17,19 @@ use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 interface PyrusClient
 {
     /**
+     * Return object that contains options.
+     */
+    public function getOptions(): PyrusClientOptions;
+
+    /**
      * All further client requests will be authorized using the provided token.
      */
     public function useAuthToken(PyrusAuthToken $token): void;
+
+    /**
+     * Return true if auth token was provided.
+     */
+    public function hasAuthToken(): bool;
 
     /**
      * Client will clear all authorisation info and try to get a new token for the provided credentials.

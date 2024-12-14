@@ -37,9 +37,25 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    public function getOptions(): PyrusClientOptions
+    {
+        return $this->options;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function useAuthToken(PyrusAuthToken $token): void
     {
         $this->token = $token;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasAuthToken(): bool
+    {
+        return null !== $this->token;
     }
 
     /**
