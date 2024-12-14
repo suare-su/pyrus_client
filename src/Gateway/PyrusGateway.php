@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace SuareSu\PyrusClient\Gateway;
 
-use SuareSu\PyrusClient\Client\PyrusAuthToken;
-use SuareSu\PyrusClient\Client\PyrusCredentials;
+use SuareSu\PyrusClient\Client\PyrusClient;
 use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
@@ -20,14 +19,9 @@ use SuareSu\PyrusClient\Entity\Form\Form;
 interface PyrusGateway
 {
     /**
-     * All further client requests will be authorized using the provided token.
+     * Return underlying client object.
      */
-    public function useAuthToken(PyrusAuthToken $token): void;
-
-    /**
-     * Client will clear all authorisation info and try to get a new token for the provided credentials.
-     */
-    public function useAuthCredentials(PyrusCredentials $credentials): void;
+    public function getClient(): PyrusClient;
 
     /**
      * @return iterable<Catalog>
