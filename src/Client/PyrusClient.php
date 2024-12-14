@@ -37,6 +37,11 @@ interface PyrusClient
     public function useAuthCredentials(PyrusCredentials $credentials): void;
 
     /**
+     * Return true if auth credentials were provided.
+     */
+    public function hasCredentials(): bool;
+
+    /**
      * Run authorization request and return auth token.
      *
      * @throws PyrusTransportException

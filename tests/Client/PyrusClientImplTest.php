@@ -42,6 +42,34 @@ final class PyrusClientImplTest extends BaseCase
     /**
      * @test
      */
+    public function testHasCrednetials(): void
+    {
+        $transport = $this->mock(PyrusTransport::class);
+        $options = $this->createOptions();
+        $crederntials = $this->createCredentials();
+
+        $client = new PyrusClientImpl($transport, $options);
+        $client->useAuthCredentials($crederntials);
+
+        $this->assertTrue($client->hasCredentials());
+    }
+
+    /**
+     * @test
+     */
+    public function testDoesntHaveCredentials(): void
+    {
+        $transport = $this->mock(PyrusTransport::class);
+        $options = $this->createOptions();
+
+        $client = new PyrusClientImpl($transport, $options);
+
+        $this->assertFalse($client->hasCredentials());
+    }
+
+    /**
+     * @test
+     */
     public function testAuth(): void
     {
         $credentials = $this->createCredentials();

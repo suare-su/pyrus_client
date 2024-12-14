@@ -70,6 +70,14 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    public function hasCredentials(): bool
+    {
+        return null !== $this->credentials;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function auth(PyrusCredentials $credentials): PyrusAuthToken
     {
         $method = PyrusEndpoint::AUTH->method();
