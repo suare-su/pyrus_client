@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace SuareSu\PyrusClient\Gateway;
 
-use SuareSu\PyrusClient\Client\PyrusAuthToken;
 use SuareSu\PyrusClient\Client\PyrusClient;
-use SuareSu\PyrusClient\Client\PyrusCredentials;
 use SuareSu\PyrusClient\DataConverter\PyrusDataConverter;
 use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
@@ -29,17 +27,9 @@ final class PyrusGatewayImpl implements PyrusGateway
     /**
      * {@inheritdoc}
      */
-    public function useAuthToken(PyrusAuthToken $token): void
+    public function getClient(): PyrusClient
     {
-        $this->client->useAuthToken($token);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function useAuthCredentials(PyrusCredentials $credentials): void
-    {
-        $this->client->useAuthCredentials($credentials);
+        return $this->client;
     }
 
     /**
