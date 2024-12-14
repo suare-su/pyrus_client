@@ -28,6 +28,20 @@ final class PyrusClientImplTest extends BaseCase
     /**
      * @test
      */
+    public function testGetOptions(): void
+    {
+        $transport = $this->mock(PyrusTransport::class);
+        $options = $this->createOptions();
+
+        $client = new PyrusClientImpl($transport, $options);
+        $res = $client->getOptions();
+
+        $this->assertSame($options, $res);
+    }
+
+    /**
+     * @test
+     */
     public function testAuth(): void
     {
         $credentials = $this->createCredentials();
@@ -64,6 +78,34 @@ final class PyrusClientImplTest extends BaseCase
         $this->assertSame($response['access_token'], $authToken->accessToken);
         $this->assertSame($response['api_url'], $authToken->apiUrl);
         $this->assertSame($response['files_url'], $authToken->filesUrl);
+    }
+
+    /**
+     * @test
+     */
+    public function testHasAuthToken(): void
+    {
+        $transport = $this->mock(PyrusTransport::class);
+        $options = $this->createOptions();
+        $authToken = $this->createAuthToken();
+
+        $client = new PyrusClientImpl($transport, $options);
+        $client->useAuthToken($authToken);
+
+        $this->assertTrue($client->hasAuthToken());
+    }
+
+    /**
+     * @test
+     */
+    public function testDoesntHaveAuthToken(): void
+    {
+        $transport = $this->mock(PyrusTransport::class);
+        $options = $this->createOptions();
+
+        $client = new PyrusClientImpl($transport, $options);
+
+        $this->assertFalse($client->hasAuthToken());
     }
 
     /**
