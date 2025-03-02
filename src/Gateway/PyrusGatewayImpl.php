@@ -11,6 +11,8 @@ use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
 use SuareSu\PyrusClient\Entity\Form\Form;
+use SuareSu\PyrusClient\Entity\Task\FormTask;
+use SuareSu\PyrusClient\Entity\Task\FormTaskCreate;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 
 /**
@@ -125,5 +127,21 @@ final class PyrusGatewayImpl implements PyrusGateway
         $form = $this->dataConverter->denormalize($raw, Form::class);
 
         return $form;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createFormTask(FormTaskCreate $task): FormTask
+    {
+        $raw = $this->client->request(
+            endpoint: PyrusEndpoint::FORM_TASK_CREATE,
+            payload: $this->dataConverter->normalize($task)
+        );
+
+        /** @var FormTask */
+        $task = $this->dataConverter->denormalize($raw, FormTask::class);
+
+        return $task;
     }
 }

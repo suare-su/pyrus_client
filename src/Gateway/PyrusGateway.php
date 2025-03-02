@@ -10,6 +10,8 @@ use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
 use SuareSu\PyrusClient\Entity\Form\Form;
+use SuareSu\PyrusClient\Entity\Task\FormTask;
+use SuareSu\PyrusClient\Entity\Task\FormTaskCreate;
 
 /**
  * Object that implements all concrete requests for Pyrus.
@@ -40,4 +42,6 @@ interface PyrusGateway
     public function getForms(): iterable;
 
     public function getForm(int $id): Form;
+
+    public function createFormTask(FormTaskCreate $task): FormTask;
 }
