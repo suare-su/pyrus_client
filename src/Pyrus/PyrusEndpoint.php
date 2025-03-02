@@ -23,6 +23,8 @@ enum PyrusEndpoint
     case FORM_INDEX;
     case FORM_READ;
 
+    case FORM_TASK_CREATE;
+
     case TEST_GET;
     case TEST_POST_PATH_PARAMS;
 
@@ -42,6 +44,8 @@ enum PyrusEndpoint
             self::FORM_INDEX => '/forms',
             self::FORM_READ => '/forms/%s',
 
+            self::FORM_TASK_CREATE => '/tasks',
+
             self::TEST_GET => '/test',
             self::TEST_POST_PATH_PARAMS => '/test/%s',
         };
@@ -60,6 +64,8 @@ enum PyrusEndpoint
             self::CATALOG_CREATE => PyrusRequestMethod::PUT,
 
             self::FORM_INDEX, self::FORM_READ => PyrusRequestMethod::GET,
+
+            self::FORM_TASK_CREATE => PyrusRequestMethod::POST,
 
             self::TEST_GET => PyrusRequestMethod::GET,
             self::TEST_POST_PATH_PARAMS => PyrusRequestMethod::POST,

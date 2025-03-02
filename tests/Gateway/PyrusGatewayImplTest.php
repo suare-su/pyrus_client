@@ -11,6 +11,8 @@ use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
 use SuareSu\PyrusClient\Entity\Form\Form;
+use SuareSu\PyrusClient\Entity\Task\FormTask;
+use SuareSu\PyrusClient\Entity\Task\FormTaskCreate;
 use SuareSu\PyrusClient\Gateway\PyrusGatewayImpl;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
 use SuareSu\PyrusClient\Tests\BaseCase;
@@ -218,6 +220,42 @@ final class PyrusGatewayImplTest extends BaseCase
 
         $gateway = new PyrusGatewayImpl($client, $dataConverter);
         $res = $gateway->getForm(self::ID);
+
+        $this->assertSame($normalizedResult, $res);
+    }
+
+    /**
+     * @test
+     */
+    public function testCreateFormTask(): void
+    {
+        $formTaskCreate = $this->mock(FormTaskCreate::class);
+        $normalizedResult = $this->mock(FormTask::class);
+
+        $client = $this->createClientAwaitsRequest(
+            PyrusEndpoint::FORM_TASK_CREATE,
+            self::RESULT,
+            [],
+            self::DENORMALIZED_INPUT
+        );
+        $dataConverter = $this->createDataConverter(
+            [
+                [
+                    $formTaskCreate,
+                    self::DENORMALIZED_INPUT,
+                ],
+            ],
+            [
+                [
+                    self::RESULT,
+                    FormTask::class,
+                    $normalizedResult,
+                ],
+            ]
+        );
+
+        $gateway = new PyrusGatewayImpl($client, $dataConverter);
+        $res = $gateway->createFormTask($formTaskCreate);
 
         $this->assertSame($normalizedResult, $res);
     }
