@@ -59,4 +59,13 @@ interface PyrusClient
      * @return array<string, mixed>
      */
     public function request(PyrusEndpoint $endpoint, array|float|int|string $urlParams = [], ?array $payload = null): array;
+
+    /**
+     * Upload provided file to Pyrus.
+     *
+     * @param array<float|int|string>|float|int|string $urlParams
+     *
+     * @return array<string, mixed>
+     */
+    public function uploadFile(PyrusEndpoint $endpoint, \SplFileInfo $file, array|float|int|string $urlParams = []): array;
 }

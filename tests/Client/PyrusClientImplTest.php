@@ -111,6 +111,26 @@ final class PyrusClientImplTest extends BaseCase
     /**
      * @test
      */
+    public function testAuthException(): void
+    {
+        $credentials = $this->createCredentials();
+        $exceptionMessage = 'exception message';
+
+        $transport = $this->mock(PyrusTransport::class);
+        $transport->expects($this->once())
+            ->method('request')
+            ->willThrowException(new \RuntimeException($exceptionMessage));
+
+        $client = new PyrusClientImpl($transport, $this->createOptions());
+
+        $this->expectException(PyrusTransportException::class);
+        $this->expectExceptionMessage($exceptionMessage);
+        $client->auth($credentials);
+    }
+
+    /**
+     * @test
+     */
     public function testHasAuthToken(): void
     {
         $transport = $this->mock(PyrusTransport::class);
@@ -405,6 +425,7 @@ final class PyrusClientImplTest extends BaseCase
         $client->useAuthToken($authToken);
 
         $this->expectException(PyrusApiUnauthorizedException::class);
+        $this->expectExceptionMessage('Api request is unauthorized');
         $client->request($endpoint);
     }
 
@@ -546,6 +567,50 @@ final class PyrusClientImplTest extends BaseCase
         $this->expectException(PyrusApiException::class);
         $this->expectExceptionMessage('Please provide credentials or authorization token');
         $client->request($endpoint);
+    }
+
+    /**
+     * @test
+     */
+    public function testUploadFile(): void
+    {
+        $endpoint = PyrusEndpoint::TEST_POST_PATH_PARAMS;
+        $urlParams = [
+            123,
+        ];
+        $file = $this->mock(\SplFileInfo::class);
+        $response = [
+            'test' => 'response',
+            'test_1' => 'response 1',
+        ];
+
+        $authToken = $this->createAuthToken();
+
+        $options = $this->createOptions();
+
+        $transport = $this->mock(PyrusTransport::class);
+        $transport->expects($this->once())
+            ->method('uploadFile')
+            ->with(
+                $this->callback(
+                    fn (PyrusRequest $request): bool => $request->method === $endpoint->method()
+                        && $request->url === rtrim($authToken->apiUrl, '/') . $endpoint->path($urlParams)
+                        && $request->headers === [
+                            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
+                        ]
+                ),
+                $this->identicalTo($file),
+                $this->identicalTo($options)
+            )
+            ->willReturn(
+                $this->createPyrusResponse($response)
+            );
+
+        $client = new PyrusClientImpl($transport, $options);
+        $client->useAuthToken($authToken);
+        $res = $client->uploadFile($endpoint, $file, $urlParams);
+
+        $this->assertSame($response, $res);
     }
 
     /**
