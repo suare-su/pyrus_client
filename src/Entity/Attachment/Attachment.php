@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SuareSu\PyrusClient\Entity\Attachment;
 
 /**
- * DTO for task for attachment from Pyrus.
+ * DTO for attachment from Pyrus.
  *
  * @psalm-api
  */

@@ -10,6 +10,7 @@ use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
+use SuareSu\PyrusClient\Entity\File\File;
 use SuareSu\PyrusClient\Entity\Form\Form;
 use SuareSu\PyrusClient\Entity\Task\FormTask;
 use SuareSu\PyrusClient\Entity\Task\FormTaskCreate;
@@ -143,5 +144,21 @@ final class PyrusGatewayImpl implements PyrusGateway
         $task = $this->dataConverter->denormalize($raw, FormTask::class);
 
         return $task;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function uploadFile(\SplFileInfo $file): File
+    {
+        $raw = $this->client->uploadFile(
+            endpoint: PyrusEndpoint::FILE_UPLOAD,
+            file: $file
+        );
+
+        /** @var File */
+        $uploadedFile = $this->dataConverter->denormalize($raw, File::class);
+
+        return $uploadedFile;
     }
 }
