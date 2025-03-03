@@ -10,6 +10,7 @@ use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
+use SuareSu\PyrusClient\Entity\File\File;
 use SuareSu\PyrusClient\Entity\Form\Form;
 use SuareSu\PyrusClient\Entity\Task\FormTask;
 use SuareSu\PyrusClient\Entity\Task\FormTaskCreate;
@@ -261,6 +262,36 @@ final class PyrusGatewayImplTest extends BaseCase
     }
 
     /**
+     * @test
+     */
+    public function testUploadFile(): void
+    {
+        $file = $this->mock(\SplFileInfo::class);
+        $normalizedResult = $this->mock(File::class);
+
+        $client = $this->createClientAwaitsFileUpload(
+            PyrusEndpoint::FILE_UPLOAD,
+            $file,
+            self::RESULT
+        );
+        $dataConverter = $this->createDataConverter(
+            [],
+            [
+                [
+                    self::RESULT,
+                    File::class,
+                    $normalizedResult,
+                ],
+            ]
+        );
+
+        $gateway = new PyrusGatewayImpl($client, $dataConverter);
+        $res = $gateway->uploadFile($file);
+
+        $this->assertSame($normalizedResult, $res);
+    }
+
+    /**
      * Create Pyrus client mock that expects provided request data.
      */
     private function createClientAwaitsRequest(PyrusEndpoint $endpoint, array $result, array|int|float|string $urlParams = [], ?array $payload = null): PyrusClient
@@ -273,6 +304,25 @@ final class PyrusGatewayImplTest extends BaseCase
                 $this->identicalTo($endpoint),
                 $this->identicalTo($urlParams),
                 $this->identicalTo($payload)
+            )
+            ->willReturn($result);
+
+        return $client;
+    }
+
+    /**
+     * Create Pyrus client mock that expects provided request data.
+     */
+    private function createClientAwaitsFileUpload(PyrusEndpoint $endpoint, \SplFileInfo $file, array $result, array|float|int|string $urlParams = []): PyrusClient
+    {
+        $client = $this->mock(PyrusClient::class);
+
+        $client->expects($this->once())
+            ->method('uploadFile')
+            ->with(
+                $this->identicalTo($endpoint),
+                $this->identicalTo($file),
+                $this->identicalTo($urlParams)
             )
             ->willReturn($result);
 

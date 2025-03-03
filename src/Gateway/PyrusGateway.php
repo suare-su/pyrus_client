@@ -9,6 +9,7 @@ use SuareSu\PyrusClient\Entity\Catalog\Catalog;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogCreate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
+use SuareSu\PyrusClient\Entity\File\File;
 use SuareSu\PyrusClient\Entity\Form\Form;
 use SuareSu\PyrusClient\Entity\Task\FormTask;
 use SuareSu\PyrusClient\Entity\Task\FormTaskCreate;
@@ -44,4 +45,6 @@ interface PyrusGateway
     public function getForm(int $id): Form;
 
     public function createFormTask(FormTaskCreate $task): FormTask;
+
+    public function uploadFile(\SplFileInfo $file): File;
 }
