@@ -323,8 +323,8 @@ final class PyrusClientImplTest extends BaseCase
                         && $request->url === rtrim($authToken->apiUrl, '/') . $endpoint->path([$urlParam])
                         && $request->payload === $payload
                         && $request->headers === [
-                            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
                             PyrusHeader::CONTENT_TYPE->value => 'application/json',
+                            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
                         ]
                 ),
                 $this->identicalTo($options)
@@ -363,6 +363,10 @@ final class PyrusClientImplTest extends BaseCase
             ->method('request')
             ->willReturnCallback(
                 function (PyrusRequest $request) use ($endpoint, $authToken, $response, $tokenResponse): PyrusResponse {
+                    if ($request->url === $endpoint->path()) {
+                        throw new \RuntimeException('Incomplete URL provided');
+                    }
+
                     if (str_ends_with($request->url, $endpoint->path())) {
                         $authHeader = $request->headers[PyrusHeader::AUTHORIZATION->value] ?? null;
                         if ($authHeader === "Bearer {$authToken->accessToken}") {
