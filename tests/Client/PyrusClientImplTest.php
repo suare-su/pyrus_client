@@ -185,8 +185,8 @@ final class PyrusClientImplTest extends BaseCase
                         && $request->url === rtrim($authToken->apiUrl, '/') . $endpoint->path() . '?test=payload&test_1=payload_1'
                         && null === $request->payload
                         && $request->headers === [
-                            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
                             PyrusHeader::CONTENT_TYPE->value => 'application/json',
+                            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
                         ]
                 ),
                 $this->identicalTo($options)
@@ -231,8 +231,8 @@ final class PyrusClientImplTest extends BaseCase
                         && $request->url === rtrim($authToken->apiUrl, '/') . $endpoint->path() . '?test_bool_true&test=payload'
                         && null === $request->payload
                         && $request->headers === [
-                            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
                             PyrusHeader::CONTENT_TYPE->value => 'application/json',
+                            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
                         ]
                 ),
                 $this->identicalTo($options)
@@ -278,8 +278,8 @@ final class PyrusClientImplTest extends BaseCase
                         && $request->url === rtrim($authToken->apiUrl, '/') . $endpoint->path($urlParams)
                         && $request->payload === $payload
                         && $request->headers === [
-                            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
                             PyrusHeader::CONTENT_TYPE->value => 'application/json',
+                            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken->accessToken}",
                         ]
                 ),
                 $this->identicalTo($options)
