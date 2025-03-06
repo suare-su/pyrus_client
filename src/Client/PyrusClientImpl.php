@@ -79,11 +79,8 @@ final class PyrusClientImpl implements PyrusClient
     public function auth(PyrusCredentials $credentials): PyrusAuthToken
     {
         $method = PyrusEndpoint::AUTH->method();
-
-        $url = $this->createEndpointUrl(
-            endpoint: PyrusEndpoint::AUTH,
-            forceBaseUrl: $this->options->accountsBaseUrl
-        );
+        $url = $this->createEndpointUrl($this->options->accountsBaseUrl, PyrusEndpoint::AUTH);
+        $headers = $this->addJsonHeaders();
 
         $payload = [
             'login' => $credentials->login,
@@ -92,10 +89,6 @@ final class PyrusClientImpl implements PyrusClient
         if (null !== $credentials->personId) {
             $payload['person_id'] = $credentials->personId;
         }
-
-        $headers = [
-            PyrusHeader::CONTENT_TYPE->value => 'application/json',
-        ];
 
         try {
             $request = new PyrusRequest($method, $url, $payload, $headers);
@@ -121,15 +114,14 @@ final class PyrusClientImpl implements PyrusClient
         return $this->runWithTokenRefreshing(
             function () use ($endpoint, $urlParams, $payload): array {
                 $method = $endpoint->method();
+                $token = $this->getOrRequestAuthorizationToken();
+                $headers = $this->addAuthHeaders($token, $this->addJsonHeaders());
 
-                $url = $this->createEndpointUrl($endpoint, $urlParams);
+                $url = $this->createEndpointUrl($token->apiUrl, $endpoint, $urlParams);
                 if (PyrusRequestMethod::GET === $endpoint->method() && null !== $payload) {
                     $url = $this->applyQueryToUrl($url, $payload);
                     $payload = null;
                 }
-
-                $headers = $this->createAuthHeaders();
-                $headers[PyrusHeader::CONTENT_TYPE->value] = 'application/json';
 
                 $request = new PyrusRequest($method, $url, $payload, $headers);
 
@@ -147,12 +139,12 @@ final class PyrusClientImpl implements PyrusClient
     {
         return $this->runWithTokenRefreshing(
             function () use ($endpoint, $file, $urlParams): array {
-                $request = new PyrusRequest(
-                    $endpoint->method(),
-                    $this->createEndpointUrl($endpoint, $urlParams),
-                    null,
-                    $this->createAuthHeaders()
-                );
+                $token = $this->getOrRequestAuthorizationToken();
+                $method = $endpoint->method();
+                $url = $this->createEndpointUrl($token->apiUrl, $endpoint, $urlParams);
+                $headers = $this->addAuthHeaders($token);
+
+                $request = new PyrusRequest($method, $url, null, $headers);
 
                 return $this->parseAndValidateResponse(
                     $this->transport->uploadFile($request, $file, $this->options)
@@ -168,13 +160,8 @@ final class PyrusClientImpl implements PyrusClient
      *
      * @psalm-return non-empty-string
      */
-    private function createEndpointUrl(PyrusEndpoint $endpoint, array|float|int|string $urlParams = [], ?string $forceBaseUrl = null): string
+    private function createEndpointUrl(string $baseUrl, PyrusEndpoint $endpoint, array|float|int|string $urlParams = []): string
     {
-        $baseUrl = (string) $this->token?->apiUrl;
-        if (null !== $forceBaseUrl) {
-            $baseUrl = $forceBaseUrl;
-        }
-
         $path = $endpoint->path(
             \is_array($urlParams) ? $urlParams : [$urlParams]
         );
@@ -271,17 +258,31 @@ final class PyrusClientImpl implements PyrusClient
     }
 
     /**
-     * Create array of authorization headers.
+     * Create array of json content headers.
+     *
+     * @param array<string, string> $headers
      *
      * @return array<string, string>
      */
-    private function createAuthHeaders(): array
+    private function addJsonHeaders(array $headers = []): array
     {
-        $authToken = $this->getOrRequestAuthorizationToken()->accessToken;
+        $headers[PyrusHeader::CONTENT_TYPE->value] = 'application/json';
 
-        return [
-            PyrusHeader::AUTHORIZATION->value => "Bearer {$authToken}",
-        ];
+        return $headers;
+    }
+
+    /**
+     * Create array of authorization headers.
+     *
+     * @param array<string, string> $headers
+     *
+     * @return array<string, string>
+     */
+    private function addAuthHeaders(PyrusAuthToken $token, array $headers = []): array
+    {
+        $headers[PyrusHeader::AUTHORIZATION->value] = "Bearer {$token->accessToken}";
+
+        return $headers;
     }
 
     /**
