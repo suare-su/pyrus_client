@@ -80,7 +80,7 @@ final class PyrusClientImpl implements PyrusClient
     {
         $method = PyrusEndpoint::AUTH->method();
         $url = $this->createEndpointUrl($this->options->accountsBaseUrl, PyrusEndpoint::AUTH);
-        $headers = $this->addJsonHeaders();
+        $headers = $this->createDefaultHeadersArray();
 
         $payload = [
             'login' => $credentials->login,
@@ -115,7 +115,7 @@ final class PyrusClientImpl implements PyrusClient
             function () use ($endpoint, $urlParams, $payload): array {
                 $method = $endpoint->method();
                 $token = $this->getOrRequestAuthorizationToken();
-                $headers = $this->addAuthHeaders($token, $this->addJsonHeaders());
+                $headers = $this->addAuthHeaders($token, $this->createDefaultHeadersArray());
 
                 $url = $this->createEndpointUrl($token->apiUrl, $endpoint, $urlParams);
                 if (PyrusRequestMethod::GET === $endpoint->method() && null !== $payload) {
@@ -260,15 +260,13 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * Create array of json content headers.
      *
-     * @param array<string, string> $headers
-     *
      * @return array<string, string>
      */
-    private function addJsonHeaders(array $headers = []): array
+    private function createDefaultHeadersArray(): array
     {
-        $headers[PyrusHeader::CONTENT_TYPE->value] = 'application/json';
-
-        return $headers;
+        return [
+            PyrusHeader::CONTENT_TYPE->value => 'application/json',
+        ];
     }
 
     /**
