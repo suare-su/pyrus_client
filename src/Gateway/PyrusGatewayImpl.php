@@ -30,6 +30,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getClient(): PyrusClient
     {
         return $this->client;
@@ -38,6 +39,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getCatalogs(): iterable
     {
         $raw = $this->client->request(PyrusEndpoint::CATALOG_INDEX);
@@ -53,6 +55,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getCatalog(int $id, bool $includeDeleted = false): Catalog
     {
         $raw = $this->client->request(
@@ -72,6 +75,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function createCatalog(CatalogCreate $catalog): Catalog
     {
         $raw = $this->client->request(
@@ -88,6 +92,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function updateCatalog(int $id, CatalogUpdate $catalog): CatalogUpdateResponse
     {
         $raw = $this->client->request(
@@ -105,6 +110,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getForms(): iterable
     {
         $raw = $this->client->request(PyrusEndpoint::FORM_INDEX);
@@ -120,6 +126,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getForm(int $id): Form
     {
         $raw = $this->client->request(PyrusEndpoint::FORM_READ, $id);
@@ -133,6 +140,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function createFormTask(FormTaskCreate $task): FormTask
     {
         $raw = $this->client->request(
@@ -149,6 +157,7 @@ final class PyrusGatewayImpl implements PyrusGateway
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function uploadFile(\SplFileInfo $file): File
     {
         $raw = $this->client->uploadFile(

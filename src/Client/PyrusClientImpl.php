@@ -35,6 +35,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getOptions(): PyrusClientOptions
     {
         return $this->options;
@@ -43,6 +44,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function useAuthToken(PyrusAuthToken $token): void
     {
         $this->token = $token;
@@ -51,6 +53,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function hasAuthToken(): bool
     {
         return null !== $this->token;
@@ -59,6 +62,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function useAuthCredentials(PyrusCredentials $credentials): void
     {
         $this->token = null;
@@ -68,6 +72,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function hasCredentials(): bool
     {
         return null !== $this->credentials;
@@ -76,6 +81,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function auth(PyrusCredentials $credentials): PyrusAuthToken
     {
         $method = PyrusEndpoint::AUTH->method();
@@ -109,6 +115,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function request(PyrusEndpoint $endpoint, array|float|int|string $urlParams = [], ?array $payload = null): array
     {
         return $this->runWithTokenRefreshing(
@@ -135,6 +142,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function uploadFile(PyrusEndpoint $endpoint, \SplFileInfo $file, array|float|int|string $urlParams = []): array
     {
         return $this->runWithTokenRefreshing(
