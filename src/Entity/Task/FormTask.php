@@ -37,6 +37,8 @@ class FormTask
         public readonly array $attachments = [],
         public readonly array $fields = [],
         public readonly array $comments = [],
+        public readonly bool $isClosed = false,
+        public readonly int $currentStep = 1,
     ) {
     }
 }
