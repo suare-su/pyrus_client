@@ -7,6 +7,6 @@ namespace SuareSu\PyrusClient\Exception;
 /**
  * Exception that will be thrown if data can't be converted.
  */
-class PyrusDataConverterException extends PyrusClientException
+final class PyrusDataConverterException extends PyrusClientException
 {
 }

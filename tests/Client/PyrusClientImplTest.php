@@ -654,9 +654,9 @@ final class PyrusClientImplTest extends BaseCase
      */
     private function createPyrusResponse(array $payload = [], PyrusResponseStatus $status = PyrusResponseStatus::OK): PyrusResponse
     {
-        return new PyrusResponse(
-            $status,
-            json_encode($payload)
-        );
+        $payloadJson = json_encode($payload);
+        $payloadJson = \is_string($payloadJson) ? $payloadJson : '';
+
+        return new PyrusResponse($status, $payloadJson);
     }
 }

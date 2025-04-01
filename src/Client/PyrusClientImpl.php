@@ -35,6 +35,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getOptions(): PyrusClientOptions
     {
         return $this->options;
@@ -43,6 +44,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function useAuthToken(PyrusAuthToken $token): void
     {
         $this->token = $token;
@@ -51,6 +53,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function hasAuthToken(): bool
     {
         return null !== $this->token;
@@ -59,6 +62,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function useAuthCredentials(PyrusCredentials $credentials): void
     {
         $this->token = null;
@@ -68,6 +72,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function hasCredentials(): bool
     {
         return null !== $this->credentials;
@@ -76,11 +81,12 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function auth(PyrusCredentials $credentials): PyrusAuthToken
     {
         $method = PyrusEndpoint::AUTH->method();
         $url = $this->createEndpointUrl($this->options->accountsBaseUrl, PyrusEndpoint::AUTH);
-        $headers = $this->addJsonHeaders();
+        $headers = $this->createDefaultHeadersArray();
 
         $payload = [
             'login' => $credentials->login,
@@ -109,13 +115,14 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function request(PyrusEndpoint $endpoint, array|float|int|string $urlParams = [], ?array $payload = null): array
     {
         return $this->runWithTokenRefreshing(
             function () use ($endpoint, $urlParams, $payload): array {
                 $method = $endpoint->method();
                 $token = $this->getOrRequestAuthorizationToken();
-                $headers = $this->addAuthHeaders($token, $this->addJsonHeaders());
+                $headers = $this->addAuthHeaders($token, $this->createDefaultHeadersArray());
 
                 $url = $this->createEndpointUrl($token->apiUrl, $endpoint, $urlParams);
                 if (PyrusRequestMethod::GET === $endpoint->method() && null !== $payload) {
@@ -135,6 +142,7 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function uploadFile(PyrusEndpoint $endpoint, \SplFileInfo $file, array|float|int|string $urlParams = []): array
     {
         return $this->runWithTokenRefreshing(
@@ -260,15 +268,13 @@ final class PyrusClientImpl implements PyrusClient
     /**
      * Create array of json content headers.
      *
-     * @param array<string, string> $headers
-     *
      * @return array<string, string>
      */
-    private function addJsonHeaders(array $headers = []): array
+    private function createDefaultHeadersArray(): array
     {
-        $headers[PyrusHeader::CONTENT_TYPE->value] = 'application/json';
-
-        return $headers;
+        return [
+            PyrusHeader::CONTENT_TYPE->value => 'application/json',
+        ];
     }
 
     /**

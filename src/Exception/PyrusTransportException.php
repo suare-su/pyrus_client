@@ -7,6 +7,6 @@ namespace SuareSu\PyrusClient\Exception;
 /**
  * Exception that will be thrown after error with network.
  */
-class PyrusTransportException extends PyrusClientException
+final class PyrusTransportException extends PyrusClientException
 {
 }

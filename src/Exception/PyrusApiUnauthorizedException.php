@@ -7,6 +7,6 @@ namespace SuareSu\PyrusClient\Exception;
 /**
  * Exception that will be thrown if request was unauthorized.
  */
-class PyrusApiUnauthorizedException extends PyrusApiException
+final class PyrusApiUnauthorizedException extends PyrusApiException
 {
 }
