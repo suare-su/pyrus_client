@@ -46,5 +46,7 @@ interface PyrusGateway
 
     public function createFormTask(FormTaskCreate $task): FormTask;
 
+    public function getTask(int $id): FormTask;
+
     public function uploadFile(\SplFileInfo $file): File;
 }

@@ -158,6 +158,23 @@ final class PyrusGatewayImpl implements PyrusGateway
      * {@inheritdoc}
      */
     #[\Override]
+    public function getTask(int $id): FormTask
+    {
+        $raw = $this->client->request(
+            PyrusEndpoint::FORM_TASK_READ,
+            $id
+        );
+
+        /** @var FormTask */
+        $task = $this->dataConverter->denormalize($raw, FormTask::class);
+
+        return $task;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    #[\Override]
     public function uploadFile(\SplFileInfo $file): File
     {
         $raw = $this->client->uploadFile(
