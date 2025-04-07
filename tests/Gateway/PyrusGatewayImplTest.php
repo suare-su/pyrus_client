@@ -264,6 +264,30 @@ final class PyrusGatewayImplTest extends BaseCase
     /**
      * @test
      */
+    public function testGetTask(): void
+    {
+        $normalizedResult = $this->mock(FormTask::class);
+
+        $client = $this->createClientAwaitsRequest(
+            PyrusEndpoint::FORM_TASK_READ,
+            self::RESULT,
+            self::ID
+        );
+        $dataConverter = $this->createDataConverterAwaitsDenormalize(
+            self::RESULT,
+            FormTask::class,
+            $normalizedResult
+        );
+
+        $gateway = new PyrusGatewayImpl($client, $dataConverter);
+        $res = $gateway->getTask(self::ID);
+
+        $this->assertSame($normalizedResult, $res);
+    }
+
+    /**
+     * @test
+     */
     public function testUploadFile(): void
     {
         $file = $this->mock(\SplFileInfo::class);
