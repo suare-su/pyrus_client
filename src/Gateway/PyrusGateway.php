@@ -11,6 +11,8 @@ use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
 use SuareSu\PyrusClient\Entity\File\File;
 use SuareSu\PyrusClient\Entity\Form\Form;
+use SuareSu\PyrusClient\Entity\Task\Comment;
+use SuareSu\PyrusClient\Entity\Task\CommentCreate;
 use SuareSu\PyrusClient\Entity\Task\FormTask;
 use SuareSu\PyrusClient\Entity\Task\FormTaskCreate;
 
@@ -47,6 +49,8 @@ interface PyrusGateway
     public function createFormTask(FormTaskCreate $task): FormTask;
 
     public function getTask(int $id): FormTask;
+
+    public function createComment(int $taskId, CommentCreate $comment): Comment;
 
     public function uploadFile(\SplFileInfo $file): File;
 }
