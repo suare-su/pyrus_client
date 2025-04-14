@@ -12,6 +12,8 @@ use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
 use SuareSu\PyrusClient\Entity\File\File;
 use SuareSu\PyrusClient\Entity\Form\Form;
+use SuareSu\PyrusClient\Entity\Task\Comment;
+use SuareSu\PyrusClient\Entity\Task\CommentCreate;
 use SuareSu\PyrusClient\Entity\Task\FormTask;
 use SuareSu\PyrusClient\Entity\Task\FormTaskCreate;
 use SuareSu\PyrusClient\Pyrus\PyrusEndpoint;
@@ -169,6 +171,24 @@ final class PyrusGatewayImpl implements PyrusGateway
         $task = $this->dataConverter->denormalize($raw, FormTask::class);
 
         return $task;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    #[\Override]
+    public function createComment(int $taskId, CommentCreate $comment): Comment
+    {
+        $raw = $this->client->request(
+            endpoint: PyrusEndpoint::FORM_TASK_COMMENT_CREATE,
+            urlParams: $taskId,
+            payload: $this->dataConverter->normalize($comment)
+        );
+
+        /** @var Comment */
+        $comment = $this->dataConverter->denormalize($raw, Comment::class);
+
+        return $comment;
     }
 
     /**

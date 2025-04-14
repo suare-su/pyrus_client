@@ -12,6 +12,8 @@ use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
 use SuareSu\PyrusClient\Entity\File\File;
 use SuareSu\PyrusClient\Entity\Form\Form;
+use SuareSu\PyrusClient\Entity\Task\Comment;
+use SuareSu\PyrusClient\Entity\Task\CommentCreate;
 use SuareSu\PyrusClient\Entity\Task\FormTask;
 use SuareSu\PyrusClient\Entity\Task\FormTaskCreate;
 use SuareSu\PyrusClient\Gateway\PyrusGatewayImpl;
@@ -281,6 +283,42 @@ final class PyrusGatewayImplTest extends BaseCase
 
         $gateway = new PyrusGatewayImpl($client, $dataConverter);
         $res = $gateway->getTask(self::ID);
+
+        $this->assertSame($normalizedResult, $res);
+    }
+
+    /**
+     * @test
+     */
+    public function testCreateComment(): void
+    {
+        $commentCreate = $this->mock(CommentCreate::class);
+        $normalizedResult = $this->mock(Comment::class);
+
+        $client = $this->createClientAwaitsRequest(
+            PyrusEndpoint::FORM_TASK_COMMENT_CREATE,
+            self::RESULT,
+            self::ID,
+            self::DENORMALIZED_INPUT
+        );
+        $dataConverter = $this->createDataConverter(
+            [
+                [
+                    $commentCreate,
+                    self::DENORMALIZED_INPUT,
+                ],
+            ],
+            [
+                [
+                    self::RESULT,
+                    Comment::class,
+                    $normalizedResult,
+                ],
+            ]
+        );
+
+        $gateway = new PyrusGatewayImpl($client, $dataConverter);
+        $res = $gateway->createComment(self::ID, $commentCreate);
 
         $this->assertSame($normalizedResult, $res);
     }

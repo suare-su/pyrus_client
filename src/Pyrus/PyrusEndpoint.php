@@ -25,6 +25,7 @@ enum PyrusEndpoint
 
     case FORM_TASK_CREATE;
     case FORM_TASK_READ;
+    case FORM_TASK_COMMENT_CREATE;
 
     case FILE_UPLOAD;
 
@@ -49,6 +50,7 @@ enum PyrusEndpoint
 
             self::FORM_TASK_CREATE => '/tasks',
             self::FORM_TASK_READ => '/tasks/%s',
+            self::FORM_TASK_COMMENT_CREATE => '/tasks/%s/comments',
 
             self::FILE_UPLOAD => '/files/upload',
 
@@ -72,7 +74,7 @@ enum PyrusEndpoint
             self::FORM_INDEX, self::FORM_READ => PyrusRequestMethod::GET,
 
             self::FORM_TASK_READ => PyrusRequestMethod::GET,
-            self::FORM_TASK_CREATE => PyrusRequestMethod::POST,
+            self::FORM_TASK_CREATE, self::FORM_TASK_COMMENT_CREATE => PyrusRequestMethod::POST,
 
             self::FILE_UPLOAD => PyrusRequestMethod::POST,
 
