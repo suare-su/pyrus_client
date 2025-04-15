@@ -12,7 +12,6 @@ use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdate;
 use SuareSu\PyrusClient\Entity\Catalog\CatalogUpdateResponse;
 use SuareSu\PyrusClient\Entity\File\File;
 use SuareSu\PyrusClient\Entity\Form\Form;
-use SuareSu\PyrusClient\Entity\Task\Comment;
 use SuareSu\PyrusClient\Entity\Task\CommentCreate;
 use SuareSu\PyrusClient\Entity\Task\FormTask;
 use SuareSu\PyrusClient\Entity\Task\FormTaskCreate;
@@ -295,12 +294,12 @@ final class PyrusGatewayImplTest extends BaseCase
     public function testCreateComment(): void
     {
         $commentCreate = $this->mock(CommentCreate::class);
-        $normalizedResult = $this->mock(Comment::class);
+        $normalizedResult = $this->mock(FormTask::class);
 
         $client = $this->createClientAwaitsRequest(
             PyrusEndpoint::FORM_TASK_COMMENT_CREATE,
             [
-                'comment' => self::RESULT,
+                'task' => self::RESULT,
             ],
             self::ID,
             self::DENORMALIZED_INPUT
@@ -315,7 +314,7 @@ final class PyrusGatewayImplTest extends BaseCase
             [
                 [
                     self::RESULT,
-                    Comment::class,
+                    FormTask::class,
                     $normalizedResult,
                 ],
             ]
