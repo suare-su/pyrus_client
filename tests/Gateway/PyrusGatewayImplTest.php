@@ -237,7 +237,9 @@ final class PyrusGatewayImplTest extends BaseCase
 
         $client = $this->createClientAwaitsRequest(
             PyrusEndpoint::FORM_TASK_CREATE,
-            self::RESULT,
+            [
+                'task' => self::RESULT,
+            ],
             [],
             self::DENORMALIZED_INPUT
         );
@@ -297,7 +299,9 @@ final class PyrusGatewayImplTest extends BaseCase
 
         $client = $this->createClientAwaitsRequest(
             PyrusEndpoint::FORM_TASK_COMMENT_CREATE,
-            self::RESULT,
+            [
+                'comment' => self::RESULT,
+            ],
             self::ID,
             self::DENORMALIZED_INPUT
         );

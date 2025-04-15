@@ -151,7 +151,7 @@ final class PyrusGatewayImpl implements PyrusGateway
         );
 
         /** @var FormTask */
-        $task = $this->dataConverter->denormalize($raw, FormTask::class);
+        $task = $this->dataConverter->denormalize($raw['task'] ?? [], FormTask::class);
 
         return $task;
     }
@@ -186,7 +186,7 @@ final class PyrusGatewayImpl implements PyrusGateway
         );
 
         /** @var Comment */
-        $comment = $this->dataConverter->denormalize($raw, Comment::class);
+        $comment = $this->dataConverter->denormalize($raw['comment'] ?? [], Comment::class);
 
         return $comment;
     }
