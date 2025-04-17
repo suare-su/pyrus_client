@@ -273,7 +273,9 @@ final class PyrusGatewayImplTest extends BaseCase
 
         $client = $this->createClientAwaitsRequest(
             PyrusEndpoint::FORM_TASK_READ,
-            self::RESULT,
+            [
+                'task' => self::RESULT,
+            ],
             self::ID
         );
         $dataConverter = $this->createDataConverterAwaitsDenormalize(
